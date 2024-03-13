@@ -8,7 +8,7 @@ from nerfstudio.engine.trainer import TrainerConfig
 from nerfstudio.pipelines.base_pipeline import Pipeline
 from PIL import Image
 
-from rebel_nerf.render.renderer import RenderedImageModality
+from thermo_nerf.render.renderer import RenderedImageModality
 
 
 class Evaluator:

@@ -6,10 +6,10 @@ from nerfstudio.data.datamanagers.base_datamanager import (
 from nerfstudio.engine.optimizers import AdamOptimizerConfig
 from nerfstudio.engine.schedulers import ExponentialDecaySchedulerConfig
 from nerfstudio.engine.trainer import TrainerConfig
-from thermo_nerf.semantic_sdf.base_models.pipeline_tracking import (
+
+from thermo_nerf.nerfstudio_config.pipeline_tracking import (
     VanillaPipelineTrackingConfig,
 )
-
 from thermo_nerf.thermal_nerf.thermal_dataparser import ThermalDataParserConfig
 from thermo_nerf.thermal_nerf.thermal_dataset import ThermalDataset
 from thermo_nerf.thermal_nerf.thermal_nerf_model import ThermalNerfModelConfig
@@ -22,11 +22,7 @@ ThermalNeRFTrackConfig = TrainerConfig(
     mixed_precision=True,
     pipeline=VanillaPipelineTrackingConfig(
         datamanager=VanillaDataManagerConfig(
-            _target=(
-                VanillaDataManager[ThermalUncertaintyDataset]
-                if ThermalNerfModelConfig.use_uncertainty_loss
-                else VanillaDataManager[ThermalDataset]
-            ),
+            _target=VanillaDataManager[ThermalDataset],
             dataparser=ThermalDataParserConfig(),
             train_num_rays_per_batch=4096,
             eval_num_rays_per_batch=4096,

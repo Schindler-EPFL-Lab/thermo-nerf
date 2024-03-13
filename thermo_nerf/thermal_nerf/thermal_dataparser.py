@@ -77,7 +77,6 @@ class Thermal(Nerfstudio):
         image_filenames = []
         mask_filenames = []
         thermal_filenames = []
-        uncertainty_filenames = []
         poses = []
 
         fx_fixed = "fl_x" in meta
@@ -153,14 +152,6 @@ class Thermal(Nerfstudio):
                     downsample_folder_prefix="thermal_",
                 )
                 thermal_filenames.append(thermal_fname)
-            if "uncertainty_file_path" in frame:
-                uncertainty_filepath = Path(frame["uncertainty_file_path"])
-                uncertainty_fname = self._get_fname(
-                    uncertainty_filepath,
-                    data_dir,
-                    downsample_folder_prefix="uncertainty_",
-                )
-                uncertainty_filenames.append(uncertainty_fname)
 
         has_split_files_spec = any(
             f"{split}_filenames" in meta for split in ("train", "val", "test")
@@ -173,7 +164,8 @@ class Thermal(Nerfstudio):
             unmatched_filenames = split_filenames.difference(image_filenames)
             if unmatched_filenames:
                 raise RuntimeError(
-                    f"Some filenames for split {split} were not found: {unmatched_filenames}."
+                    f"Some filenames for split {split} were "
+                    "not found: {unmatched_filenames}."
                 )
 
             indices = [
@@ -236,11 +228,6 @@ class Thermal(Nerfstudio):
         thermal_filenames = (
             [thermal_filenames[i] for i in indices]
             if len(thermal_filenames) > 0
-            else []
-        )
-        uncertainty_filenames = (
-            [uncertainty_filenames[i] for i in indices]
-            if len(uncertainty_filenames) > 0
             else []
         )
 
@@ -346,9 +333,6 @@ class Thermal(Nerfstudio):
             dataparser_transform=transform_matrix,
             metadata={
                 "thermal": thermal_filenames if len(thermal_filenames) > 0 else None,
-                "uncertainty": uncertainty_filenames
-                if len(uncertainty_filenames) > 0
-                else None,
             },
         )
         return dataparser_outputs

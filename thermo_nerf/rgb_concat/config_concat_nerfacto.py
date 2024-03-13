@@ -1,18 +1,15 @@
 from nerfstudio.cameras.camera_optimizers import CameraOptimizerConfig
 from nerfstudio.configs.base_config import ViewerConfig
-from nerfstudio.data.datamanagers.base_datamanager import (
-    VanillaDataManager,
-    VanillaDataManagerConfig,
-)
+from nerfstudio.data.datamanagers.base_datamanager import VanillaDataManagerConfig
 from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
 from nerfstudio.engine.optimizers import AdamOptimizerConfig
 from nerfstudio.engine.schedulers import ExponentialDecaySchedulerConfig
 from nerfstudio.engine.trainer import TrainerConfig
 
-from rebel_nerf.rgb_concat.concat_nerfacto_model import ConcatNerfModelConfig
-from rebel_nerf.semantic_sdf.base_models.pipeline_tracking import (
+from thermo_nerf.nerfstudio_config.pipeline_tracking import (
     VanillaPipelineTrackingConfig,
 )
+from thermo_nerf.rgb_concat.concat_nerfacto_model import ConcatNerfModelConfig
 
 ConcatNerfConfig = TrainerConfig(
     method_name="concat_nerf",

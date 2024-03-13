@@ -1,0 +1,161 @@
+!!python/object:nerfstudio.engine.trainer.TrainerConfig
+_target: !!python/name:nerfstudio.engine.trainer.Trainer ''
+data: null
+experiment_name: facade70-training-job
+load_config: null
+load_dir: null
+load_step: null
+log_gradients: false
+logging: !!python/object:nerfstudio.configs.base_config.LoggingConfig
+  enable_profiler: true
+  local_writer: !!python/object:nerfstudio.configs.base_config.LocalWriterConfig
+    _target: !!python/name:nerfstudio.utils.writer.LocalWriter ''
+    enable: true
+    max_log_size: 10
+    stats_to_track: !!python/tuple
+    - !!python/object/apply:nerfstudio.utils.writer.EventName
+      - Train Iter (time)
+    - !!python/object/apply:nerfstudio.utils.writer.EventName
+      - Train Rays / Sec
+    - !!python/object/apply:nerfstudio.utils.writer.EventName
+      - Test PSNR
+    - !!python/object/apply:nerfstudio.utils.writer.EventName
+      - Vis Rays / Sec
+    - !!python/object/apply:nerfstudio.utils.writer.EventName
+      - Test Rays / Sec
+    - !!python/object/apply:nerfstudio.utils.writer.EventName
+      - ETA (time)
+  max_buffer_size: 20
+  relative_log_dir: !!python/object/apply:pathlib.PosixPath []
+  steps_per_log: 10
+machine: !!python/object:nerfstudio.configs.base_config.MachineConfig
+  dist_url: auto
+  machine_rank: 0
+  num_gpus: 1
+  num_machines: 1
+  seed: 42
+max_num_iterations: 2
+method_name: vanilla-nerf
+mixed_precision: false
+optimizers:
+  fields:
+    optimizer: !!python/object:nerfstudio.engine.optimizers.RAdamOptimizerConfig
+      _target: &id001 !!python/name:torch.optim.radam.RAdam ''
+      eps: 1.0e-08
+      lr: 0.0005
+      max_norm: null
+      weight_decay: 0
+    scheduler: null
+  temporal_distortion:
+    optimizer: !!python/object:nerfstudio.engine.optimizers.RAdamOptimizerConfig
+      _target: *id001
+      eps: 1.0e-08
+      lr: 0.0005
+      max_norm: null
+      weight_decay: 0
+    scheduler: null
+output_dir: !!python/object/apply:pathlib.PosixPath
+- /
+- mnt
+- azureml
+- cr
+- j
+- 46195b8ef01c444a9875a5f038e4ffc2
+- cap
+- data-capability
+- wd
+- output_dir
+pipeline: !!python/object:nerfstudio.pipelines.base_pipeline.VanillaPipelineConfig
+  _target: !!python/name:nerfstudio.pipelines.base_pipeline.VanillaPipeline ''
+  datamanager: !!python/object:nerfstudio.data.datamanagers.base_datamanager.VanillaDataManagerConfig
+    _target: !!python/name:nerfstudio.data.datamanagers.base_datamanager.VanillaDataManager ''
+    camera_optimizer: !!python/object:nerfstudio.cameras.camera_optimizers.CameraOptimizerConfig
+      _target: !!python/name:nerfstudio.cameras.camera_optimizers.CameraOptimizer ''
+      mode: 'off'
+      optimizer: !!python/object:nerfstudio.engine.optimizers.AdamOptimizerConfig
+        _target: !!python/name:torch.optim.adam.Adam ''
+        eps: 1.0e-15
+        lr: 0.0006
+        max_norm: null
+        weight_decay: 0
+      orientation_noise_std: 0.0
+      param_group: camera_opt
+      position_noise_std: 0.0
+      scheduler: !!python/object:nerfstudio.engine.schedulers.ExponentialDecaySchedulerConfig
+        _target: !!python/name:nerfstudio.engine.schedulers.ExponentialDecayScheduler ''
+        lr_final: null
+        lr_pre_warmup: 1.0e-08
+        max_steps: 10000
+        ramp: cosine
+        warmup_steps: 0
+    camera_res_scale_factor: 1.0
+    data: null
+    dataparser: !!python/object:nerfstudio.data.dataparsers.nerfstudio_dataparser.NerfstudioDataParserConfig
+      _target: !!python/name:nerfstudio.data.dataparsers.nerfstudio_dataparser.Nerfstudio ''
+      auto_scale_poses: true
+      center_method: poses
+      data: !!python/object/apply:pathlib.PosixPath
+      - /
+      - mnt
+      - azureml
+      - cr
+      - j
+      - 46195b8ef01c444a9875a5f038e4ffc2
+      - cap
+      - data-capability
+      - wd
+      - INPUT_data
+      depth_unit_scale_factor: 0.001
+      downscale_factor: null
+      orientation_method: up
+      scale_factor: 1.0
+      scene_scale: 1.0
+      train_split_fraction: 0.9
+    eval_image_indices: !!python/tuple
+    - 0
+    eval_num_images_to_sample_from: -1
+    eval_num_rays_per_batch: 1024
+    eval_num_times_to_repeat_images: -1
+    patch_size: 1
+    train_num_images_to_sample_from: -1
+    train_num_rays_per_batch: 1024
+    train_num_times_to_repeat_images: -1
+  model: !!python/object:nerfstudio.models.vanilla_nerf.VanillaModelConfig
+    _target: !!python/name:nerfstudio.models.vanilla_nerf.NeRFModel ''
+    collider_params:
+      far_plane: 6.0
+      near_plane: 2.0
+    enable_collider: true
+    enable_temporal_distortion: false
+    eval_num_rays_per_chunk: 4096
+    loss_coefficients:
+      rgb_loss_coarse: 1.0
+      rgb_loss_fine: 1.0
+    num_coarse_samples: 64
+    num_importance_samples: 128
+    temporal_distortion_params:
+      kind: !!python/object/apply:nerfstudio.field_components.temporal_distortions.TemporalDistortionKind
+      - dnerf
+relative_model_dir: !!python/object/apply:pathlib.PosixPath
+- nerfstudio_models
+save_only_latest_checkpoint: true
+steps_per_eval_all_images: 25000
+steps_per_eval_batch: 500
+steps_per_eval_image: 500
+steps_per_save: 1000
+timestamp: 2023-04-19_142352
+viewer: !!python/object:nerfstudio.configs.base_config.ViewerConfig
+  image_format: jpeg
+  ip_address: 127.0.0.1
+  jpeg_quality: 90
+  launch_bridge_server: true
+  max_num_display_images: 512
+  num_rays_per_chunk: 32768
+  png_compression: 1
+  quit_on_train_completion: true
+  relative_log_filename: viewer_log_filename.txt
+  start_train: true
+  websocket_port: null
+  websocket_port_default: 7007
+  zmq_port: null
+vis: viewer

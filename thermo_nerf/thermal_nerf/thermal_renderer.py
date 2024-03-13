@@ -1,8 +1,5 @@
-from typing import Generator, Literal, Optional, Tuple, Union
+from typing import Literal, Optional, Union
 
-import matplotlib.pyplot as plt
-import mlflow
-import nerfacc
 import torch
 from jaxtyping import Float, Int
 from nerfstudio.utils import colors
@@ -21,9 +18,6 @@ class ThermalRenderer(nn.Module):
     Renders thermal images the same way we render semantic labels
     and depth images.
     """
-
-    # def __init__(self) -> None:
-    #     super().__init__()
 
     def __init__(self, background_color: BackgroundColor = "random") -> None:
         super().__init__()
@@ -53,23 +47,12 @@ class ThermalRenderer(nn.Module):
         """
         background_color = "last_sample"
         if ray_indices is not None and num_rays is not None:
-            # Necessary for packed samples from volumetric ray sampler
-            if background_color == "last_sample":
-                raise NotImplementedError(
-                    "Background color 'last_sample' not implemented for packed samples."
-                )
-            comp_thermal = nerfacc.accumulate_along_rays(
-                weights[..., 0],
-                values=thermal,
-                ray_indices=ray_indices,
-                n_rays=num_rays,
+            raise NotImplementedError(
+                "Background color 'last_sample' not implemented for packed samples."
             )
-            accumulated_weight = nerfacc.accumulate_along_rays(
-                weights[..., 0], values=None, ray_indices=ray_indices, n_rays=num_rays
-            )
-        else:
-            comp_thermal = torch.sum(weights * thermal, dim=-2)
-            accumulated_weight = torch.sum(weights, dim=-2)
+
+        comp_thermal = torch.sum(weights * thermal, dim=-2)
+        accumulated_weight = torch.sum(weights, dim=-2)
 
         if thermal.shape[-1] == 1 or len(thermal.shape) == 2:
             # repeat channels
@@ -99,13 +82,14 @@ class ThermalRenderer(nn.Module):
     def get_background_color(
         cls,
         background_color: BackgroundColor,
-        shape: Tuple[int, ...],
+        shape: tuple[int, ...],
         device: torch.device,
     ) -> Union[Float[Tensor, "3"], Float[Tensor, "*bs 3"]]:
         """Returns the thermal background color for a specified background color.
 
         Note:
-            This function CANNOT be called for background_color being either "last_sample" or "random".
+            This function CANNOT be called for background_color being either
+            "last_sample" or "random".
 
         Args:
             thermal: thermal for each sample.

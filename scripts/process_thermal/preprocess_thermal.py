@@ -1,19 +1,9 @@
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import tyro
 
-# This is a hack so that the script work with azure sdkv2.
-# The root folder is _not_ added to the python path as it was in sdkv1
-# and thus, local imports of rebel_nerf are not found.
-# Remove when https://github.com/Azure/azure-sdk-for-python/issues/29724 is fixed
-
-sys.path.append(".")
-sys.path.append("./nerfstudio")
-
-
-from rebel_nerf.flir_themral_images.custom_flir import CustomFlir  # noqa: E402
+from thermo_nerf.flir_thermal_images.custom_flir import CustomFlir
 
 
 @dataclass

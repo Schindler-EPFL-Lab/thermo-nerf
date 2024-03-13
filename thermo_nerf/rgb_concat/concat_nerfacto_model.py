@@ -1,21 +1,13 @@
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Tuple, Type
+from typing import Type
 
 import numpy as np
 import torch
 from nerfstudio.cameras.camera_optimizers import CameraOptimizer, CameraOptimizerConfig
-from nerfstudio.cameras.rays import RayBundle, RaySamples
 from nerfstudio.data.scene_box import SceneBox
-from nerfstudio.field_components.field_heads import FieldHeadNames
 from nerfstudio.field_components.spatial_distortions import SceneContraction
 from nerfstudio.fields.density_fields import HashMLPDensityField
-from nerfstudio.fields.nerfacto_field import NerfactoField
-from nerfstudio.model_components.losses import (
-    MSELoss,
-    distortion_loss,
-    interlevel_loss,
-    scale_gradients_by_distance_squared,
-)
+from nerfstudio.model_components.losses import MSELoss, distortion_loss, interlevel_loss
 from nerfstudio.model_components.ray_samplers import (
     ProposalNetworkSampler,
     UniformSampler,
@@ -24,20 +16,17 @@ from nerfstudio.model_components.renderers import (
     AccumulationRenderer,
     DepthRenderer,
     NormalsRenderer,
-    RGBRenderer,
 )
 from nerfstudio.model_components.scene_colliders import NearFarCollider
 from nerfstudio.model_components.shaders import NormalsShader
-from nerfstudio.models.base_model import Model, ModelConfig
 from nerfstudio.models.nerfacto import NerfactoModel, NerfactoModelConfig
 from nerfstudio.utils import colormaps
-from torch import Tensor
 from torchmetrics.functional import structural_similarity_index_measure
 from torchmetrics.image import PeakSignalNoiseRatio
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 
-from rebel_nerf.rgb_concat.concat_field import ConcatNerfactoTField
-from rebel_nerf.rgb_concat.rgbt_renderer import RGBTRenderer
+from thermo_nerf.rgb_concat.concat_field import ConcatNerfactoTField
+from thermo_nerf.rgb_concat.rgbt_renderer import RGBTRenderer
 
 
 @dataclass
@@ -51,8 +40,6 @@ class ConcatNerfModelConfig(NerfactoModelConfig):
     """optimisation weight of the thermal loss."""
     pass_thermal_gradients: bool = True
     """Whether to pass thermal gradients."""
-    use_uncertainty_loss: bool = False
-    """Whether to use uncertainty loss."""
     camera_optimizer: CameraOptimizerConfig = CameraOptimizerConfig(mode="SO3xR3")
     """Config of the camera optimizer to use"""
 
@@ -97,7 +84,9 @@ class ConcatNerfModel(NerfactoModel):
             spatial_distortion=scene_contraction,
             num_images=self.num_train_data,
             use_pred_normals=self.config.predict_normals,
-            use_average_appearance_embedding=self.config.use_average_appearance_embedding,
+            use_average_appearance_embedding=(
+                self.config.use_average_appearance_embedding
+            ),
             appearance_embedding_dim=self.config.appearance_embed_dim,
             implementation=self.config.implementation,
         )
@@ -204,10 +193,9 @@ class ConcatNerfModel(NerfactoModel):
 
         loss_dict["rgb_loss"] = self.rgb_loss(gt_rgb, pred_rgb)
         if self.training:
-            loss_dict[
-                "interlevel_loss"
-            ] = self.config.interlevel_loss_mult * interlevel_loss(
-                outputs["weights_list"], outputs["ray_samples_list"]
+            loss_dict["interlevel_loss"] = (
+                self.config.interlevel_loss_mult
+                * interlevel_loss(outputs["weights_list"], outputs["ray_samples_list"])
             )
             assert metrics_dict is not None and "distortion" in metrics_dict
             loss_dict["distortion_loss"] = (
@@ -215,17 +203,15 @@ class ConcatNerfModel(NerfactoModel):
             )
             if self.config.predict_normals:
                 # orientation loss for computed normals
-                loss_dict[
-                    "orientation_loss"
-                ] = self.config.orientation_loss_mult * torch.mean(
-                    outputs["rendered_orientation_loss"]
+                loss_dict["orientation_loss"] = (
+                    self.config.orientation_loss_mult
+                    * torch.mean(outputs["rendered_orientation_loss"])
                 )
 
                 # ground truth supervision for normals
-                loss_dict[
-                    "pred_normal_loss"
-                ] = self.config.pred_normal_loss_mult * torch.mean(
-                    outputs["rendered_pred_normal_loss"]
+                loss_dict["pred_normal_loss"] = (
+                    self.config.pred_normal_loss_mult
+                    * torch.mean(outputs["rendered_pred_normal_loss"])
                 )
             # Add loss from camera optimizer
             self.camera_optimizer.get_loss_dict(loss_dict)
@@ -247,8 +233,8 @@ class ConcatNerfModel(NerfactoModel):
         return metrics_dict
 
     def get_image_metrics_and_images(
-        self, outputs: Dict[str, torch.Tensor], batch: Dict[str, torch.Tensor]
-    ) -> Tuple[Dict[str, float], Dict[str, torch.Tensor]]:
+        self, outputs: dict[str, torch.Tensor], batch: dict[str, torch.Tensor]
+    ) -> tuple[dict[str, float], dict[str, torch.Tensor]]:
         gt_rgb = batch["image"].to(self.device)
         predicted_rgb = outputs[
             "rgb"

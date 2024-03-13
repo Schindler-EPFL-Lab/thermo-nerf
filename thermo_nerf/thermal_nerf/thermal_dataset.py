@@ -6,7 +6,6 @@ import numpy as np
 import torch
 from nerfstudio.data.dataparsers.base_dataparser import DataparserOutputs
 from nerfstudio.data.datasets.base_dataset import InputDataset
-from PIL import Image
 
 
 class ThermalDataset(InputDataset):

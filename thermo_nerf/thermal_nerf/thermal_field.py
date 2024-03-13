@@ -1,8 +1,7 @@
-from typing import Dict, Literal, Optional, Union
+from typing import Literal
 
 import torch
 from nerfstudio.cameras.rays import RaySamples
-from nerfstudio.field_components.encodings import HashEncoding
 from nerfstudio.field_components.field_heads import FieldHeadNames
 from nerfstudio.field_components.mlp import MLP
 from nerfstudio.field_components.spatial_distortions import SpatialDistortion
@@ -25,7 +24,7 @@ class ThermalFieldHead(BaseThermalFieldHead):
         activation: output head activation
     """
 
-    def __init__(self, in_dim: Optional[int] = None) -> None:
+    def __init__(self, in_dim: int | None = None) -> None:
         super().__init__(
             in_dim=in_dim,
             out_dim=1,
@@ -109,8 +108,8 @@ class ThermalNerfactoTField(NerfactoField):
         self.pass_rgb_gradients = True
 
     def get_outputs(
-        self, ray_samples: RaySamples, density_embedding: Optional[Tensor] = None
-    ) -> Dict[Union[FieldHeadNamesT, FieldHeadNames], Tensor]:
+        self, ray_samples: RaySamples, density_embedding: Tensor | None = None
+    ) -> dict[FieldHeadNamesT | FieldHeadNames, Tensor]:
         assert density_embedding is not None
 
         outputs = {}
@@ -124,9 +123,10 @@ class ThermalNerfactoTField(NerfactoField):
         outputs_shape = ray_samples.frustums.directions.shape[:-1]
 
         # appearance
-        if self.training:
+        if self.training and self.embedding_appearance is not None:
             embedded_appearance = self.embedding_appearance(camera_indices)
         else:
+            assert self.embedding_appearance is not None
             if self.use_average_appearance_embedding:
                 embedded_appearance = torch.ones(
                     (*directions.shape[:-1], self.appearance_embedding_dim),
@@ -153,9 +153,7 @@ class ThermalNerfactoTField(NerfactoField):
                 .view(*outputs_shape, -1)
                 .to(directions)
             )
-            outputs[FieldHeadNames.UNCERTAINTY] = self.field_head_transient_uncertainty(
-                x
-            )
+
             outputs[FieldHeadNames.TRANSIENT_RGB] = self.field_head_transient_rgb(x)
             outputs[FieldHeadNames.TRANSIENT_DENSITY] = (
                 self.field_head_transient_density(x)
@@ -186,7 +184,7 @@ class ThermalNerfactoTField(NerfactoField):
 
     def forward(
         self, ray_samples: RaySamples, compute_normals: bool = False
-    ) -> Dict[Union[FieldHeadNamesT, FieldHeadNames], Tensor]:
+    ) -> dict[FieldHeadNamesT | FieldHeadNames, Tensor]:
         if compute_normals:
             with torch.enable_grad():
                 density, density_embedding = self.get_density(ray_samples)

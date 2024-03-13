@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+version = "0.0.1"
+name = "thermo-nerf"
+description = 'thermo-nerf'
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = []
+dependencies = ["nerfstudio >= 0.1.19", "mlflow >= 2.11.1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["thermo_nerf"]
+
+[tool.isort]
+profile = "black"
+known_third_party = ["nerfstudio"]

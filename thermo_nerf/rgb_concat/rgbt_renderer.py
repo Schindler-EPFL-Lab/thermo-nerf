@@ -1,4 +1,4 @@
-from typing import Generator, Literal, Optional, Tuple, Union
+from typing import Literal, Union
 
 import nerfacc
 import torch
@@ -11,7 +11,7 @@ BackgroundColor = Union[
     Float[Tensor, "3"],
     Float[Tensor, "*bs 3"],
 ]
-BACKGROUND_COLOR_OVERRIDE: Optional[Float[Tensor, "3"]] = None
+BACKGROUND_COLOR_OVERRIDE: Float[Tensor, "3"] | None = None
 
 
 class RGBTRenderer(nn.Module):
@@ -30,11 +30,12 @@ class RGBTRenderer(nn.Module):
         rgb: Float[Tensor, "*bs num_samples 3"],
         weights: Float[Tensor, "*bs num_samples 1"],
         background_color: BackgroundColor = "random",
-        ray_indices: Optional[Int[Tensor, "num_samples"]] = None,
-        num_rays: Optional[int] = None,
+        ray_indices: Int[Tensor, "num_samples"] | None = None,
+        num_rays: int | None = None,
     ) -> Float[Tensor, "*bs 3"]:
         """Composite samples along ray and render color image.
-        If background color is random, no BG color is added - as if the background was black!
+        If background color is random, no BG color is added - as if the background
+        was black!
 
         Args:
             rgb: RGB for each sample
@@ -64,8 +65,8 @@ class RGBTRenderer(nn.Module):
 
         rgb_only = comp_rgb[..., :3]
         if background_color == "random":
-            # If background color is random, the predicted color is returned without blending,
-            # as if the background color was black.
+            # If background color is random, the predicted color is returned without
+            # blending, as if the background color was black.
             return comp_rgb
 
         elif background_color == "last_sample":
@@ -83,13 +84,14 @@ class RGBTRenderer(nn.Module):
     def get_background_color(
         cls,
         background_color: BackgroundColor,
-        shape: Tuple[int, ...],
+        shape: tuple[int, ...],
         device: torch.device,
     ) -> Union[Float[Tensor, "3"], Float[Tensor, "*bs 3"]]:
         """Returns the RGB background color for a specified background color.
 
         Note:
-            This function CANNOT be called for background_color being either "last_sample" or "random".
+            This function CANNOT be called for background_color being either
+            "last_sample" or "random".
 
         Args:
             rgb: RGB for each sample.
@@ -114,7 +116,7 @@ class RGBTRenderer(nn.Module):
         pred_image: Tensor,
         pred_accumulation: Tensor,
         gt_image: Tensor,
-    ) -> Tuple[Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor]:
         """Blends a background color into the ground truth and predicted image for
         loss computation.
 
@@ -138,9 +140,9 @@ class RGBTRenderer(nn.Module):
         self,
         rgb: Float[Tensor, "*bs num_samples 3"],
         weights: Float[Tensor, "*bs num_samples 1"],
-        ray_indices: Optional[Int[Tensor, "num_samples"]] = None,
-        num_rays: Optional[int] = None,
-        background_color: Optional[BackgroundColor] = None,
+        ray_indices: Int[Tensor, "num_samples"] | None = None,
+        num_rays: int | None = None,
+        background_color: BackgroundColor | None = None,
     ) -> Float[Tensor, "*bs 3"]:
         """Composite samples along ray and render color image
 

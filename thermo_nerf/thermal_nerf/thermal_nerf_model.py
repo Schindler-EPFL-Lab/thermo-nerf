@@ -1,16 +1,14 @@
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Tuple, Type
+from typing import Type
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 from nerfstudio.cameras.camera_optimizers import CameraOptimizer, CameraOptimizerConfig
 from nerfstudio.cameras.rays import RayBundle, RaySamples
 from nerfstudio.data.scene_box import SceneBox
 from nerfstudio.field_components.field_heads import FieldHeadNames
 from nerfstudio.field_components.spatial_distortions import SceneContraction
 from nerfstudio.fields.density_fields import HashMLPDensityField
-from nerfstudio.fields.nerfacto_field import NerfactoField
 from nerfstudio.model_components.losses import (
     MSELoss,
     interlevel_loss,
@@ -28,7 +26,6 @@ from nerfstudio.model_components.renderers import (
 )
 from nerfstudio.model_components.scene_colliders import NearFarCollider
 from nerfstudio.model_components.shaders import NormalsShader
-from nerfstudio.models.base_model import Model, ModelConfig
 from nerfstudio.models.nerfacto import NerfactoModel, NerfactoModelConfig
 from nerfstudio.utils import colormaps
 from torch import Tensor, nn
@@ -55,8 +52,6 @@ class ThermalNerfModelConfig(NerfactoModelConfig):
     """optimisation weight of the thermal loss."""
     pass_thermal_gradients: bool = True
     """Whether to pass thermal gradients."""
-    use_uncertainty_loss: bool = False
-    """Whether to use uncertainty loss."""
     camera_optimizer: CameraOptimizerConfig = CameraOptimizerConfig(mode="SO3xR3")
     """Config of the camera optimizer to use"""
     max_temperature: float = 1.0
@@ -78,7 +73,7 @@ class ThermalNerfModel(NerfactoModel):
     def __init__(
         self,
         config: ThermalNerfModelConfig,
-        metadata: Dict,
+        metadata: dict,
         scene_box: SceneBox,
         num_train_data: int,
         **kwargs,
@@ -88,8 +83,6 @@ class ThermalNerfModel(NerfactoModel):
 
         super().__init__(config, scene_box, num_train_data, **kwargs)
         self.config = config
-        self.use_uncertainty_loss = config.use_uncertainty_loss
-        self.alpha = nn.Parameter(torch.tensor(config.alpha))
         self.threshold = config.threshold
         self.mae_thermal = mae_thermal
         self.max_temperature = config.max_temperature
@@ -97,8 +90,6 @@ class ThermalNerfModel(NerfactoModel):
 
         self.sigmoid = nn.Sigmoid()
         self.softmax = nn.Softmax(dim=1)
-        self.gamma = config.gamma
-        self.beta = config.beta
 
     def populate_modules(self):
         """
@@ -341,8 +332,8 @@ class ThermalNerfModel(NerfactoModel):
         return loss_dict
 
     def get_image_metrics_and_images(
-        self, outputs: Dict[str, Tensor], batch: Dict[str, Tensor]
-    ) -> Tuple[Dict[str, float], Dict[str, Tensor]]:
+        self, outputs: dict[str, Tensor], batch: dict[str, Tensor]
+    ) -> tuple[dict[str, float], dict[str, Tensor]]:
         """
         Outputs a dictionary of metrics and images for rendering and viewing.
 
