@@ -2,13 +2,13 @@
 
 The ThermoNeRF package is built on top of [Nerfstudio](https://github.com/nerfstudio-project/nerfstudio).
 
-The Nerfstudio commit hash used in our experiments: 3dd162aae8ae7c166928e1f02bf97e7febe3a18e . 
+The Nerfstudio commit hash used in our experiments: [3dd162aae8ae7c166928e1f02bf97e7febe3a18e](https://github.com/nerfstudio-project/nerfstudio/tree/3dd162aae8ae7c166928e1f02bf97e7febe3a18e).
 
 A more complete repo will published upon acceptance.
 
 ## Setup
 
-ThermoNeRF was tested under Python 3.10 with torch 1.
+ThermoNeRF was tested under Python 3.10 with torch `1.13.1`.
 Install the package by running `pip install -e .` and then thermoNeRF should be ready to go.
 
 ## Train and Evaluate
