@@ -16,15 +16,12 @@ from thermo_nerf.thermal_nerf.thermal_field_head import (
 
 
 class ThermalFieldHead(BaseThermalFieldHead):
-    """Thermal output
-
-    Args:
-        num_classes: Number of semantic classes
-        in_dim: input dimension. If not defined in constructor, it must be set later.
-        activation: output head activation
-    """
+    """Thermal output"""
 
     def __init__(self, in_dim: int | None = None) -> None:
+        """`in_dim` is the input dimension. If not defined in the constructor,
+        it must be set later.
+        """
         super().__init__(
             in_dim=in_dim,
             out_dim=1,

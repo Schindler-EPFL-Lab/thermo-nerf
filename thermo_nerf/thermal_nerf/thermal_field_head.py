@@ -29,6 +29,10 @@ class BaseThermalFieldHead(FieldComponent):
         in_dim: Optional[int] = None,
         activation: Optional[Union[nn.Module, Callable]] = None,
     ) -> None:
+        """`out_dim` represents the output dimension for the renderer.
+        `field_head_name` is the type of field output.
+        `in_dim` is the input dimension. If not defined in the constructor, it must be
+        set later. `activation` is the output head activation."""
         super().__init__()
         self.out_dim = out_dim
         self.activation = activation
@@ -49,13 +53,12 @@ class BaseThermalFieldHead(FieldComponent):
     def forward(
         self, in_tensor: Shaped[Tensor, "*bs in_dim"]
     ) -> Shaped[Tensor, "*bs out_dim"]:
-        """Process network output for renderer
+        """
+        Process network output for renderer
 
-        Args:
-            in_tensor: Network input
+        `in_tensor` is the network input.
 
-        Returns:
-            Render head output
+        :return: Render head output
         """
         if not self.net:
             raise SystemError(
