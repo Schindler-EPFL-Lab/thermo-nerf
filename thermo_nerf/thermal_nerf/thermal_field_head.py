@@ -62,7 +62,8 @@ class BaseThermalFieldHead(FieldComponent):
         """
         if not self.net:
             raise SystemError(
-                "in_dim not set. Must be provided to constructor, or set_in_dim() should be called."
+                "in_dim not set. Must be provided to constructor, or set_in_dim()"
+                " should be called."
             )
         out_tensor = self.net(in_tensor)
         if self.activation:

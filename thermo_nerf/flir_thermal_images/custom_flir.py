@@ -3,10 +3,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from FlirImageExtractor.flir_image_extractor import FlirImageExtractor
 from matplotlib import cm
 from PIL import Image
-
-from FlirImageExtractor.flir_image_extractor import FlirImageExtractor
 
 
 def get_min_max_temperatures(path_to_csv_files: str) -> tuple[float, float]:
@@ -86,10 +85,6 @@ class CustomFlir(FlirImageExtractor):
                 self.absolute_min_temperature,
                 self.absolute_max_temperature,
             )
-
-            # temperature = temperature.reshape(640, 480)
-            # image = Image.fromarray(temperature)
-            # image.save(Path(path_to_thermal_images_curated, Path(path).stem + ".tiff"))
 
             gray_scale_image = temperature.reshape(640, 480).astype("uint8")
 
