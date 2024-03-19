@@ -222,7 +222,8 @@ class Thermal(Nerfstudio):
 
         poses[:, :3, 3] *= scale_factor
 
-        # Choose image_filenames and poses based on split, but after auto orient and scaling the poses.
+        # Choose image_filenames and poses based on split, but after auto orient
+        # and scaling the poses.
         image_filenames = [image_filenames[i] for i in indices]
 
         thermal_filenames = (

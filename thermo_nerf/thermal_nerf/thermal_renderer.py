@@ -33,7 +33,8 @@ class ThermalRenderer(nn.Module):
         num_rays: Optional[int] = None,
     ) -> Float[Tensor, "*bs 3"]:
         """Composite samples along ray and render color image.
-        If background color is random, no BG color is added - as if the background was black!
+        If background color is random, no BG color is added - as if the background was
+        black!
 
         Args:
             thermal: thermal for each sample
