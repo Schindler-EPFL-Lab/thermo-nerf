@@ -2,3 +2,4 @@
 /data
 /outputs
 **/__pycache__/**
+/env

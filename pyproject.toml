@@ -3,13 +3,16 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-version = "0.0.1"
+version = "1.0.0"
 name = "thermo-nerf"
 description = 'thermo-nerf'
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = []
+keywords = ["pytorch", "thermal", "nerf", "mlflow", "flir"]
 dependencies = ["nerfstudio >= 0.1.19", "mlflow >= 2.11.1"]
+
+[project.optional-dependencies]
+flir = ["flirimageextractor >= 1.5.3"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["thermo_nerf"]
