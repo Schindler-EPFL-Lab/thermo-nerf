@@ -1,12 +1,19 @@
 # ThermoNeRF
 
-The ThermoNeRF package is built on top of [Nerfstudio](https://github.com/nerfstudio-project/nerfstudio).
+This repo is the official Pytorch code from [ThermoNerf]().
 
+## Introduction
+
+![Summary of the method](https://github.com/SchindlerEPFL/thermo-nerf/tree/main/images/summary.png)
+
+we present ThermoNeRF, a novel multimodal approach based on Neural Radiance Fields, capable of rendering new RGB and thermal views of a scene jointly.
+To overcome the lack of texture in thermal images, we use paired RGB and thermal images to learn scene density, while distinct networks estimate color and temperature information.
+Furthermore, we introduce ThermoScenes, a new dataset to palliate the lack of available RGB+thermal datasets for scene reconstruction.
+
+The ThermoNeRF package is built on top of [Nerfstudio](https://github.com/nerfstudio-project/nerfstudio).
 The Nerfstudio commit hash used in our experiments: [3dd162aae8ae7c166928e1f02bf97e7febe3a18e](https://github.com/nerfstudio-project/nerfstudio/tree/3dd162aae8ae7c166928e1f02bf97e7febe3a18e).
 
-A more complete repo will published upon acceptance.
-
-## Setup
+## Installation
 
 ThermoNeRF was tested under Python 3.10 with torch `1.13.1`.
 Install the package by running `pip install -e .` and then thermoNeRF should be ready to go.
