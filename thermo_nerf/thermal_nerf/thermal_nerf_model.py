@@ -60,6 +60,8 @@ class ThermalNerfModelConfig(NerfactoModelConfig):
     """Minimum temperature in the dataset."""
     threshold: float = 0.0
     """Threshold for the thermal images that separated foreground from background."""
+    cold: bool = False
+    """Flag to indicate if the dataset includes cold temperatures."""
 
 
 class ThermalNerfModel(NerfactoModel):
