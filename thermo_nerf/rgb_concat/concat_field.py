@@ -5,6 +5,8 @@ from nerfstudio.field_components.spatial_distortions import SpatialDistortion
 from nerfstudio.fields.nerfacto_field import NerfactoField
 from torch import Tensor, nn
 
+from typing import Optional
+
 
 class ConcatNerfactoTField(NerfactoField):
     def __init__(
@@ -31,7 +33,7 @@ class ConcatNerfactoTField(NerfactoField):
         pass_semantic_gradients: bool = False,
         use_pred_normals: bool = False,
         use_average_appearance_embedding: bool = False,
-        spatial_distortion: SpatialDistortion | None = None,
+         spatial_distortion: Optional[SpatialDistortion] = None,
         implementation: Literal["tcnn", "torch"] = "tcnn",
     ) -> None:
         super().__init__(

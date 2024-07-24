@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional, Dict, Union
 
 import torch
 from nerfstudio.cameras.rays import RaySamples
@@ -18,7 +18,7 @@ from thermo_nerf.thermal_nerf.thermal_field_head import (
 class ThermalFieldHead(BaseThermalFieldHead):
     """Thermal output"""
 
-    def __init__(self, in_dim: int | None = None) -> None:
+    def __init__(self, in_dim: Optional[int] = None) -> None:
         """`in_dim` is the input dimension. If not defined in the constructor,
         it must be set later.
         """
@@ -55,7 +55,7 @@ class ThermalNerfactoTField(NerfactoField):
         pass_semantic_gradients: bool = False,
         use_pred_normals: bool = False,
         use_average_appearance_embedding: bool = False,
-        spatial_distortion: SpatialDistortion | None = None,
+        spatial_distortion: Optional[SpatialDistortion] = None,
         implementation: Literal["tcnn", "torch"] = "tcnn",
         pass_thermal_gradients: bool = False,
     ) -> None:
@@ -106,8 +106,8 @@ class ThermalNerfactoTField(NerfactoField):
         self.pass_rgb_gradients = True
 
     def get_outputs(
-        self, ray_samples: RaySamples, density_embedding: Tensor | None = None
-    ) -> dict[FieldHeadNamesT | FieldHeadNames, Tensor]:
+        self, ray_samples: RaySamples, density_embedding: Optional[Tensor] = None
+    ) -> Dict[Union[FieldHeadNamesT, FieldHeadNames], Tensor]:
         assert density_embedding is not None
 
         outputs = {}
@@ -182,7 +182,7 @@ class ThermalNerfactoTField(NerfactoField):
 
     def forward(
         self, ray_samples: RaySamples, compute_normals: bool = False
-    ) -> dict[FieldHeadNamesT | FieldHeadNames, Tensor]:
+    ) -> Dict[Union[FieldHeadNamesT, FieldHeadNames], Tensor]:
         if compute_normals:
             with torch.enable_grad():
                 density, density_embedding = self.get_density(ray_samples)

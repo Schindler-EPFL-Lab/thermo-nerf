@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal, Union, Optional
 
 import nerfacc
 import torch
@@ -11,7 +11,7 @@ BackgroundColor = Union[
     Float[Tensor, "3"],
     Float[Tensor, "*bs 3"],
 ]
-BACKGROUND_COLOR_OVERRIDE: Float[Tensor, "3"] | None = None
+BACKGROUND_COLOR_OVERRIDE: Optional[Float[Tensor, "3"]] = None
 
 
 class RGBTRenderer(nn.Module):
@@ -30,8 +30,10 @@ class RGBTRenderer(nn.Module):
         rgb: Float[Tensor, "*bs num_samples 3"],
         weights: Float[Tensor, "*bs num_samples 1"],
         background_color: BackgroundColor = "random",
-        ray_indices: Int[Tensor, "num_samples"] | None = None,
-        num_rays: int | None = None,
+#         ray_indices: Optional[Int[Tensor, "num_samples"]] = None,
+#         num_rays: Optional[int] = None,
+        ray_indices: Optional[Int[Tensor, "num_samples"]] = None,
+        num_rays: Optional[int] = None
     ) -> Float[Tensor, "*bs 3"]:
         """Composite samples along ray and render color image.
         If background color is random, no BG color is added - as if the background
@@ -140,9 +142,12 @@ class RGBTRenderer(nn.Module):
         self,
         rgb: Float[Tensor, "*bs num_samples 3"],
         weights: Float[Tensor, "*bs num_samples 1"],
-        ray_indices: Int[Tensor, "num_samples"] | None = None,
-        num_rays: int | None = None,
-        background_color: BackgroundColor | None = None,
+#         ray_indices: Int[Tensor, "num_samples"] | None = None,
+#         num_rays: int | None = None,
+#         background_color: BackgroundColor | None = None,
+        ray_indices: Optional[Int[Tensor, "num_samples"]] = None,
+        num_rays: Optional[int] = None,
+        background_color: Optional[BackgroundColor] = None,
     ) -> Float[Tensor, "*bs 3"]:
         """Composite samples along ray and render color image
 
