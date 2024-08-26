@@ -66,10 +66,10 @@ class Evaluator:
         ) in datamanager.fixed_indices_eval_dataloader:
             # Generate camera indices based on the number of camera_to_worlds
             camera_indices = torch.arange(camera_ray_bundle.camera_to_worlds.shape[0])
-            camera_ray_bundle = camera_ray_bundle.generate_rays(camera_indices)
+            cameras = camera_ray_bundle.generate_rays(camera_indices)
             
             outputs = self._pipeline.model.get_outputs_for_camera_ray_bundle(
-                camera_ray_bundle
+                cameras
             )
             (
                 metrics_dict,
