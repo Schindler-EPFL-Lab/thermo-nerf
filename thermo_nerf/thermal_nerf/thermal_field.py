@@ -83,6 +83,7 @@ class ThermalNerfactoTField(NerfactoField):
             use_pred_normals,
             use_average_appearance_embedding,
             spatial_distortion,
+            1.0,
             implementation,
         )
 
