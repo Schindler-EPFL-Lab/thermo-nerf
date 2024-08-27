@@ -63,6 +63,7 @@ class ThermalNerfModelConfig(NerfactoModelConfig):
     cold: bool = False
     """Flag to indicate if the dataset includes cold temperatures."""
 
+
 class ThermalNerfModel(NerfactoModel):
     """
     ThermalNerfModel extends NerfactoModel to support thermal images
