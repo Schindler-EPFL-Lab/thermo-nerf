@@ -12,7 +12,6 @@ To overcome the lack of texture in thermal images, we use paired RGB and thermal
 One of the unique contribution of ThermoNeRF is that both RGB and thermal data are used to backpropagate to the density, leading to a consistent representation of the scene for both RGB and thermal.
 
 The ThermoNeRF package is built on top of [Nerfstudio](https://github.com/nerfstudio-project/nerfstudio).
-The Nerfstudio commit hash used in our experiments: [3dd162aae8ae7c166928e1f02bf97e7febe3a18e](https://github.com/nerfstudio-project/nerfstudio/tree/3dd162aae8ae7c166928e1f02bf97e7febe3a18e).
 
 ## Dataset
 
