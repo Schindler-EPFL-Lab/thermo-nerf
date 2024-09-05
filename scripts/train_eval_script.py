@@ -3,14 +3,11 @@ from pathlib import Path
 
 import tyro
 from nerfstudio.engine.trainer import TrainerConfig
-from nerfstudio.scripts.train import main  # noqa: E402
-
-from thermo_nerf.evaluator.evaluator import Evaluator  # noqa: E402
-from thermo_nerf.render.renderer import RenderedImageModality, Renderer  # noqa: E402
-from thermo_nerf.rgb_concat.config_concat_nerfacto import ConcatNerfConfig  # noqa: E402
-from thermo_nerf.thermal_nerf.config_thermal_nerf import (  # noqa: E402
-    ThermalNeRFTrackConfig,
-)
+from nerfstudio.scripts.train import main
+from thermo_nerf.evaluator.evaluator import Evaluator
+from thermo_nerf.render.renderer import RenderedImageModality, Renderer
+from thermo_nerf.rgb_concat.config_concat_nerfacto import ConcatNerfConfig
+from thermo_nerf.thermal_nerf.config_thermal_nerf import ThermalNeRFTrackConfig
 
 
 @dataclass

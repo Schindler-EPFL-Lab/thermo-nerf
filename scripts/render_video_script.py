@@ -7,8 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import tyro
-
-from thermo_nerf.render.renderer import RenderedImageModality, Renderer  # noqa: E402
+from thermo_nerf.render.renderer import RenderedImageModality, Renderer
 
 
 @dataclass

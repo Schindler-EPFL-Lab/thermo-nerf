@@ -2,9 +2,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import tyro
-
-from thermo_nerf.evaluator.evaluator import Evaluator  # noqa: E402
-from thermo_nerf.render.renderer import RenderedImageModality, Renderer  # noqa: E402
+from thermo_nerf.evaluator.evaluator import Evaluator
+from thermo_nerf.render.renderer import RenderedImageModality, Renderer
 
 
 @dataclass
