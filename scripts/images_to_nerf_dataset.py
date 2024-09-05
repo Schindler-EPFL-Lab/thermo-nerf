@@ -3,7 +3,7 @@ Processes an image sequence to a nerfstudio compatible dataset.
 """
 
 import tyro
-from nerfstudio.process_data.images_to_nerfstudio_dataset import (  # noqa: E402
+from nerfstudio.process_data.images_to_nerfstudio_dataset import (
     ImagesToNerfstudioDataset,
 )
 
