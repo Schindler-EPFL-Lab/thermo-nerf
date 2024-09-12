@@ -343,9 +343,14 @@ class ThermalNerfModel(NerfactoModel):
         """
         metrics_dict, images_dict = super().get_image_metrics_and_images(outputs, batch)
         thermal = colormaps.apply_float_colormap(outputs["thermal"], colormap="gray")
+        gt_thermal = colormaps.apply_float_colormap(
+            batch["thermal"].to(self.device), colormap="gray"
+        )
+        combined_thermal = torch.cat([gt_thermal, thermal], dim=1)
 
-        images_dict.update({"thermal": thermal})
+        images_dict.update({"thermal": combined_thermal})
 
+        # Switch images from [H, W, C] to [1, C, H, W] for metrics computations
         gt_thermal = torch.moveaxis(batch["thermal"], -1, 0)[None, ...]
         predicted_thermal = torch.moveaxis(outputs["thermal"], -1, 0)[None, ...]
 
