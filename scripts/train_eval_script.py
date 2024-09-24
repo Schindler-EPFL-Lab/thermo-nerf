@@ -2,12 +2,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import tyro
-from nerfstudio.engine.trainer import TrainerConfig
 from nerfstudio.scripts.train import main
+
 from thermo_nerf.evaluator.evaluator import Evaluator
+from thermo_nerf.nerfacto_config.config_nerfacto import nerfacto_config
 from thermo_nerf.render.renderer import RenderedImageModality, Renderer
-from thermo_nerf.rgb_concat.config_concat_nerfacto import ConcatNerfConfig
-from thermo_nerf.thermal_nerf.config_thermal_nerf import ThermalNeRFTrackConfig
+from thermo_nerf.rgb_concat.config_concat_nerfacto import concat_nerf_config
+from thermo_nerf.thermal_nerf.config_thermal_nerf import thermal_nerftrack_config
 
 
 @dataclass
@@ -36,9 +37,9 @@ class TrainingParameters:
 
     def __post_init__(self) -> None:
         mapping_name_to_config = {
-            "nerfacto": TrainerConfig,
-            "thermal-nerf": ThermalNeRFTrackConfig,
-            "concat-nerf": ConcatNerfConfig,
+            "nerfacto": nerfacto_config,
+            "thermal-nerf": thermal_nerftrack_config,
+            "concat-nerf": concat_nerf_config,
         }
         self.model = mapping_name_to_config[self.model_type]
 
@@ -60,6 +61,7 @@ if __name__ == "__main__":
     evaluator = Evaluator(
         pipeline=pipeline,
         config=config,
+        modalities_to_save=parameters.modalities_to_save,
     )
 
     evaluator.save_metrics(output_folder=parameters.metrics_output_folder)

@@ -1,6 +1,9 @@
 from nerfstudio.cameras.camera_optimizers import CameraOptimizerConfig
 from nerfstudio.configs.base_config import ViewerConfig
-from nerfstudio.data.datamanagers.base_datamanager import VanillaDataManagerConfig
+from nerfstudio.data.datamanagers.base_datamanager import (
+    VanillaDataManager,
+    VanillaDataManagerConfig,
+)
 from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
 from nerfstudio.engine.optimizers import AdamOptimizerConfig
 from nerfstudio.engine.schedulers import ExponentialDecaySchedulerConfig
@@ -9,9 +12,10 @@ from nerfstudio.engine.trainer import TrainerConfig
 from thermo_nerf.nerfstudio_config.pipeline_tracking import (
     VanillaPipelineTrackingConfig,
 )
+from thermo_nerf.rgb_concat.concat_dataset import ConcatDataset
 from thermo_nerf.rgb_concat.concat_nerfacto_model import ConcatNerfModelConfig
 
-ConcatNerfConfig = TrainerConfig(
+concat_nerf_config = TrainerConfig(
     method_name="concat_nerf",
     steps_per_eval_batch=500,
     steps_per_save=2000,
@@ -19,7 +23,8 @@ ConcatNerfConfig = TrainerConfig(
     mixed_precision=True,
     pipeline=VanillaPipelineTrackingConfig(
         datamanager=VanillaDataManagerConfig(
-            dataparser=NerfstudioDataParserConfig(),
+            _target=VanillaDataManager[ConcatDataset],
+            dataparser=NerfstudioDataParserConfig(eval_mode="filename"),
             train_num_rays_per_batch=4096,
             eval_num_rays_per_batch=4096,
         ),
