@@ -1,33 +1,36 @@
+from nerfstudio.cameras.camera_optimizers import CameraOptimizerConfig
 from nerfstudio.configs.base_config import ViewerConfig
-from nerfstudio.data.datamanagers.base_datamanager import (
-    VanillaDataManager,
-    VanillaDataManagerConfig,
-)
+from nerfstudio.data.datamanagers.base_datamanager import VanillaDataManagerConfig
+from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
 from nerfstudio.engine.optimizers import AdamOptimizerConfig
 from nerfstudio.engine.schedulers import ExponentialDecaySchedulerConfig
 from nerfstudio.engine.trainer import TrainerConfig
+from nerfstudio.models.nerfacto import NerfactoModelConfig
 
 from thermo_nerf.nerfstudio_config.pipeline_tracking import (
     VanillaPipelineTrackingConfig,
 )
-from thermo_nerf.thermal_nerf.thermal_dataparser import ThermalDataParserConfig
-from thermo_nerf.thermal_nerf.thermal_dataset import ThermalDataset
-from thermo_nerf.thermal_nerf.thermal_nerf_model import ThermalNerfModelConfig
 
-thermal_nerftrack_config = TrainerConfig(
-    method_name="thermal-nerf",
+nerfacto_config = TrainerConfig(
+    method_name="nerfacto-track",
     steps_per_eval_batch=500,
     steps_per_save=2000,
     max_num_iterations=30000,
     mixed_precision=True,
     pipeline=VanillaPipelineTrackingConfig(
         datamanager=VanillaDataManagerConfig(
-            _target=VanillaDataManager[ThermalDataset],
-            dataparser=ThermalDataParserConfig(),
+            dataparser=NerfstudioDataParserConfig(eval_mode="filename"),
             train_num_rays_per_batch=4096,
             eval_num_rays_per_batch=4096,
+            camera_optimizer=CameraOptimizerConfig(
+                mode="SO3xR3",
+                optimizer=AdamOptimizerConfig(lr=6e-4, eps=1e-8, weight_decay=1e-2),
+                scheduler=ExponentialDecaySchedulerConfig(
+                    lr_final=6e-6, max_steps=200000
+                ),
+            ),
         ),
-        model=ThermalNerfModelConfig(eval_num_rays_per_chunk=1 << 16),
+        model=NerfactoModelConfig(eval_num_rays_per_chunk=1 << 15),
     ),
     optimizers={
         "proposal_networks": {
@@ -43,6 +46,6 @@ thermal_nerftrack_config = TrainerConfig(
             ),
         },
     },
-    viewer=ViewerConfig(num_rays_per_chunk=1 << 15),
+    viewer=ViewerConfig(num_rays_per_chunk=1 << 15, quit_on_train_completion=True),
     vis="viewer",
 )

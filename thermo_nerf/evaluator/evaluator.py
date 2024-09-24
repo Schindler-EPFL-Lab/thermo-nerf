@@ -80,17 +80,9 @@ class Evaluator:
             images_dict["rgb"] = images_dict.pop("img")
 
             for modality in self.modalities_to_save:
-                # if modality == RenderedImageModality.thermal:
-                #     print("image dict thermal: ", images_dict[modality.value])
-                #     self._evaluation_images[modality].append(
-                #         (images_dict[modality.value]).cpu().numpy()
-                #     )
-                # else:
                 self._evaluation_images[modality].append(
                     (images_dict[modality.value] * 255).byte().cpu().numpy()
                 )
-            # print("evaluation images: ", self._evaluation_images.keys())
-
             metrics_dict_list.append(metrics_dict)
 
         metrics_dict = {}
@@ -135,16 +127,8 @@ class Evaluator:
         """
         for modality in modalities:
             for idx, image in enumerate(self._evaluation_images[modality]):
-                # if modality == RenderedImageModality.thermal:
-                #     Image.fromarray(image).save(
-                #         output_path / f"{modality.value}_{idx:05d}.tiff"
-                #     )
-                # else:
                 if image.shape[-1] == 4:
                     image = image[:, :, 3]
-                    # Image.fromarray(image, "RGBA").save(
-                    #     output_path / f"{modality.value}_{idx:05d}.png"
-                    # )
                     Image.fromarray(image).save(
                         output_path / f"{modality.value}_{idx:05d}.jpg"
                     )
