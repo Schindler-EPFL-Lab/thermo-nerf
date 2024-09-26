@@ -24,6 +24,8 @@ from nerfstudio.data.utils.dataparsers_utils import (
 )
 from nerfstudio.utils.io import load_from_json
 
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
+
 
 @dataclass
 class ThermalDataParserConfig(NerfstudioDataParserConfig):
@@ -333,7 +335,9 @@ class Thermal(Nerfstudio):
             dataparser_scale=scale_factor,
             dataparser_transform=transform_matrix,
             metadata={
-                "thermal": thermal_filenames if len(thermal_filenames) > 0 else None,
+                RenderedImageModality.THERMAL.value: (
+                    thermal_filenames if len(thermal_filenames) > 0 else None
+                ),
             },
         )
         return dataparser_outputs

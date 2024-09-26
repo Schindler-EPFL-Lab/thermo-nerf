@@ -2,8 +2,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import tyro
+
 from thermo_nerf.evaluator.evaluator import Evaluator
-from thermo_nerf.render.renderer import RenderedImageModality, Renderer
+from thermo_nerf.render.renderer import Renderer
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
 
 
 @dataclass
@@ -19,7 +21,7 @@ class EvalCLIArgs:
     """Name of the output folder to save metrics"""
     modalities_to_save: list[RenderedImageModality] = field(
         default_factory=lambda: [
-            RenderedImageModality.rgb,
+            RenderedImageModality.RGB,
         ]
     )
     """Name of the renderer outputs to use: rgb, depth, accumulation."""

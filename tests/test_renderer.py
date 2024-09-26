@@ -5,7 +5,8 @@ from unittest.mock import patch
 import numpy as np
 from nerfstudio.models.vanilla_nerf import NeRFModel
 
-from thermo_nerf.render.renderer import RenderedImageModality, Renderer
+from thermo_nerf.render.renderer import Renderer
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
 
 
 class TestRenderer(unittest.TestCase):
@@ -24,7 +25,7 @@ class TestRenderer(unittest.TestCase):
         array = np.reshape(array, (1024, 720))
 
         cls._renderer_vanilla._rendered_images = {
-            RenderedImageModality.rgb: [array, array]
+            RenderedImageModality.RGB: [array, array]
         }
 
     def test_load(self) -> None:
@@ -47,7 +48,7 @@ class TestRenderer(unittest.TestCase):
         output_dir.mkdir(exist_ok=True)
 
         self._renderer_vanilla.save_images(
-            [RenderedImageModality.rgb], output_dir=output_dir
+            [RenderedImageModality.RGB], output_dir=output_dir
         )
         files = []
         for file in output_dir.iterdir():
@@ -59,7 +60,7 @@ class TestRenderer(unittest.TestCase):
     def test_gif_export(self) -> None:
         output_dir = Path("tests/tmp_output")
         output_dir.mkdir(exist_ok=True)
-        self._renderer_vanilla.save_gif([RenderedImageModality.rgb], 1, output_dir)
+        self._renderer_vanilla.save_gif([RenderedImageModality.RGB], 1, output_dir)
 
     def test_load_cameras_positions(self) -> None:
         cameras = Renderer.load_cameras(

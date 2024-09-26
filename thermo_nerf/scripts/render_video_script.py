@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Optional
 
 import tyro
-from thermo_nerf.render.renderer import RenderedImageModality, Renderer
+
+from thermo_nerf.render.renderer import Renderer
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
 
 
 @dataclass
@@ -27,8 +29,8 @@ class RenderTrajectoryCLIArgs:
     """Save images to a folder in `output_dir`"""
     rendered_image_modalities: list[RenderedImageModality] = field(
         default_factory=lambda: [
-            RenderedImageModality.rgb,
-            RenderedImageModality.thermal,
+            RenderedImageModality.RGB,
+            RenderedImageModality.THERMAL,
         ]
     )
     """Name of the renderer outputs to use: rgb, depth, accumulation."""

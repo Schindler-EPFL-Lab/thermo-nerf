@@ -7,6 +7,8 @@ import torch
 from nerfstudio.data.dataparsers.base_dataparser import DataparserOutputs
 from nerfstudio.data.datasets.base_dataset import InputDataset
 
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
+
 
 class ThermalDataset(InputDataset):
     """
@@ -14,7 +16,7 @@ class ThermalDataset(InputDataset):
     """
 
     exclude_batch_keys_from_device = InputDataset.exclude_batch_keys_from_device + [
-        "thermal"
+        RenderedImageModality.THERMAL.value
     ]
 
     def __init__(
@@ -24,8 +26,8 @@ class ThermalDataset(InputDataset):
         kernel_size: int = 3,
     ) -> None:
         super().__init__(dataparser_outputs, scale_factor)
-        assert "thermal" in dataparser_outputs.metadata.keys()
-        self.thermal_filenames = self.metadata["thermal"]
+        assert RenderedImageModality.THERMAL.value in dataparser_outputs.metadata.keys()
+        self.thermal_filenames = self.metadata[RenderedImageModality.THERMAL.value]
         self.kernel_size = kernel_size
 
     def get_metadata(self, data: Dict) -> Dict[str, torch.Tensor]:
@@ -42,7 +44,7 @@ class ThermalDataset(InputDataset):
             scale_factor=self.scale_factor,
         )
 
-        return {"thermal": thermal_data}
+        return {RenderedImageModality.THERMAL.value: thermal_data}
 
     @staticmethod
     def get_thermal_tensors_from_path(

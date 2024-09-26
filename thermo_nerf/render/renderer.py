@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from pathlib import Path
 from typing import Optional
 
@@ -13,15 +12,7 @@ from nerfstudio.engine.trainer import TrainerConfig
 from nerfstudio.models.base_model import Model
 from nerfstudio.pipelines.base_pipeline import Pipeline
 
-
-class RenderedImageModality(Enum):
-    rgb = "rgb"
-    depth = "depth"
-    accumulation = "accumulation"
-    thermal = "thermal"
-
-    def __str__(self):
-        return str(self.value)
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
 
 
 class Renderer:
