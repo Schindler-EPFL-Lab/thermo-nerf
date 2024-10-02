@@ -5,13 +5,13 @@ from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataPars
 from nerfstudio.engine.optimizers import AdamOptimizerConfig
 from nerfstudio.engine.schedulers import ExponentialDecaySchedulerConfig
 from nerfstudio.engine.trainer import TrainerConfig
-from nerfstudio.models.nerfacto import NerfactoModelConfig
 
+from thermo_nerf.nerfacto_config.thermal_nerfacto import ThermalNerfactoModelConfig
 from thermo_nerf.nerfstudio_config.pipeline_tracking import (
     VanillaPipelineTrackingConfig,
 )
 
-nerfacto_config = TrainerConfig(
+thermalnerfacto_config = TrainerConfig(
     method_name="nerfacto-track",
     steps_per_eval_batch=500,
     steps_per_save=2000,
@@ -30,7 +30,7 @@ nerfacto_config = TrainerConfig(
                 ),
             ),
         ),
-        model=NerfactoModelConfig(eval_num_rays_per_chunk=1 << 15),
+        model=ThermalNerfactoModelConfig(eval_num_rays_per_chunk=1 << 15),
     ),
     optimizers={
         "proposal_networks": {

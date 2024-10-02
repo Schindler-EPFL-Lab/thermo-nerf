@@ -14,7 +14,7 @@ from thermo_nerf.thermal_nerf.thermal_dataparser import ThermalDataParserConfig
 from thermo_nerf.thermal_nerf.thermal_dataset import ThermalDataset
 from thermo_nerf.thermal_nerf.thermal_nerf_model import ThermalNerfModelConfig
 
-thermal_nerftrack_config = TrainerConfig(
+thermal_nerf_config = TrainerConfig(
     method_name="thermal-nerf",
     steps_per_eval_batch=500,
     steps_per_save=2000,

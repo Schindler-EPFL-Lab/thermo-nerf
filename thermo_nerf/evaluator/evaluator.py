@@ -8,6 +8,7 @@ from nerfstudio.engine.trainer import TrainerConfig
 from nerfstudio.pipelines.base_pipeline import Pipeline
 from PIL import Image
 
+from thermo_nerf.nerfacto_config.thermal_nerfacto import ThermalNerfactoModel
 from thermo_nerf.rendered_image_modalities import RenderedImageModality
 
 
@@ -21,6 +22,7 @@ class Evaluator:
         config: TrainerConfig,
         job_param_identifier: Optional[str] = None,
         modalities_to_save: list[RenderedImageModality] = [RenderedImageModality.RGB],
+        threshold: float | None = None,
     ) -> None:
         """
         Initializes the parameters which are `output_file` to save the metrics, the
@@ -33,7 +35,7 @@ class Evaluator:
         self._evaluation_images: dict[RenderedImageModality, list[np.ndarray]] = {}
 
         self.modalities_to_save = modalities_to_save
-        self._metrics = self._compute_metrics()
+        self._metrics = self._compute_metrics(threshold=threshold)
 
         self._benchmark_info = {
             "experiment_name": config.experiment_name,
@@ -42,9 +44,7 @@ class Evaluator:
             "results": self._metrics,
         }
 
-    def _compute_metrics(
-        self,
-    ) -> dict[str, float]:
+    def _compute_metrics(self, threshold: float | None) -> dict[str, float]:
         """
         Computes metrics on eval data extracted from 'self._pipeline'
 
@@ -68,13 +68,17 @@ class Evaluator:
             camera_indices = torch.arange(cameras.camera_to_worlds.shape[0])
             camera_ray_bundle = cameras.generate_rays(camera_indices)
 
+            assert isinstance(self._pipeline.model, ThermalNerfactoModel)
+
             outputs = self._pipeline.model.get_outputs_for_camera_ray_bundle(
                 camera_ray_bundle
             )
             (
                 metrics_dict,
                 images_dict,
-            ) = self._pipeline.model.get_image_metrics_and_images(outputs, batch)
+            ) = self._pipeline.model.get_image_metrics_and_images(
+                outputs, batch, threshold=threshold
+            )
 
             for modality in self.modalities_to_save:
                 self._evaluation_images[modality].append(
@@ -84,35 +88,14 @@ class Evaluator:
 
         metrics_dict = {}
         for key in metrics_dict_list[0].keys():
-            if key == "mae_thermal":
-
-                key_std, key_mean = torch.std_mean(
-                    torch.cat(
-                        [metrics_dict[key] for metrics_dict in metrics_dict_list], dim=0
-                    )
-                )
-                metrics_dict[f"{key}_mean"] = float(key_mean)
-                metrics_dict[f"{key}_std"] = float(key_std)
-                thermal_tensors = [
-                    metrics_dict[key] for metrics_dict in metrics_dict_list
-                ]
-                list_of_lists = []
-                for tensor in thermal_tensors:
-                    tensor_as_list = tensor.tolist()
-                    list_of_lists.append([tensor_as_list])
-                metrics_dict[key] = list_of_lists
-
-            else:
-                key_std, key_mean = torch.std_mean(
-                    torch.tensor(
-                        [metrics_dict[key] for metrics_dict in metrics_dict_list]
-                    )
-                )
-                metrics_dict[f"{key}_mean"] = float(key_mean)
-                metrics_dict[f"{key}_std"] = float(key_std)
-                metrics_dict[key] = [
-                    metrics_dict[key] for metrics_dict in metrics_dict_list
-                ]
+            key_std, key_mean = torch.std_mean(
+                torch.tensor([metrics_dict[key] for metrics_dict in metrics_dict_list])
+            )
+            metrics_dict[f"{key}_mean"] = float(key_mean)
+            metrics_dict[f"{key}_std"] = float(key_std)
+            metrics_dict[key] = [
+                metrics_dict[key] for metrics_dict in metrics_dict_list
+            ]
 
         return metrics_dict
 
