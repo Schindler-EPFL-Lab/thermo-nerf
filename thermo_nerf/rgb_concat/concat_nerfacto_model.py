@@ -25,6 +25,7 @@ from torchmetrics.functional import structural_similarity_index_measure
 from torchmetrics.image import PeakSignalNoiseRatio
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
 from thermo_nerf.rgb_concat.concat_field import ConcatNerfactoTField
 from thermo_nerf.rgb_concat.rgbt_renderer import RGBTRenderer
 
@@ -187,7 +188,7 @@ class ConcatNerfModel(NerfactoModel):
 
         pred_rgb, gt_rgb = self.renderer_rgb.blend_background_for_loss_computation(
             pred_image=outputs["rgb"],
-            pred_accumulation=outputs["accumulation"],
+            pred_accumulation=outputs[RenderedImageModality.ACCUMULATION.value],
             gt_image=image,
         )
 
@@ -240,10 +241,12 @@ class ConcatNerfModel(NerfactoModel):
             "rgb"
         ]  # Blended with background (black if random background)
 
-        acc = colormaps.apply_colormap(outputs["accumulation"])
+        acc = colormaps.apply_colormap(
+            outputs[RenderedImageModality.ACCUMULATION.value]
+        )
         depth = colormaps.apply_depth_colormap(
-            outputs["depth"],
-            accumulation=outputs["accumulation"],
+            outputs[RenderedImageModality.DEPTH.value],
+            accumulation=outputs[RenderedImageModality.ACCUMULATION.value],
         )
 
         combined_rgb = torch.cat([gt_rgb, predicted_rgb], dim=1)
@@ -270,16 +273,16 @@ class ConcatNerfModel(NerfactoModel):
         metrics_dict["lpips"] = float(lpips)
 
         images_dict = {
-            "img": combined_rgb,
-            "accumulation": combined_acc,
-            "depth": combined_depth,
+            RenderedImageModality.RGB.value: combined_rgb,
+            RenderedImageModality.ACCUMULATION.value: combined_acc,
+            RenderedImageModality.DEPTH.value: combined_depth,
         }
 
         for i in range(self.config.num_proposal_iterations):
             key = f"prop_depth_{i}"
             prop_depth_i = colormaps.apply_depth_colormap(
                 outputs[key],
-                accumulation=outputs["accumulation"],
+                accumulation=outputs[RenderedImageModality.ACCUMULATION.value],
             )
             images_dict[key] = prop_depth_i
 

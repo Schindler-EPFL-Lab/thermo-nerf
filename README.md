@@ -27,13 +27,13 @@ Install the package by running `pip install -e .` and then thermoNeRF should be 
 To train and evaluate ThermoNeRF, first download our dataset and then use the following scripts
 
 ```bash
-python scripts/train_eval_script.py --data-asset-path DATA_PATH --model-type thermal-nerf --max-num-iterations ITERATIONS
+python thermo_nerf/scripts/train_eval_script.py --data-asset-path DATA_PATH --model-type thermal-nerf --max-num-iterations ITERATIONS
 ```
 
 E.g.
 
 ```bash
-python scripts/train_eval_script.py --data data/ThermoScenes/double_robot/ --model_type thermal-nerf --max_num_iterations 1000
+python thermo_nerf/scripts/train_eval_script.py --data data/ThermoScenes/double_robot/ --model_type thermal-nerf --max_num_iterations 1000
 ```
 
 ## Evaluate
@@ -41,7 +41,7 @@ python scripts/train_eval_script.py --data data/ThermoScenes/double_robot/ --mod
 To evaluate a model, run the following script.
 
 ```bash
-python scripts/eval_script.py --dataset_path DATA_PATH --model_uri MODEL_PATH --output_folder RESULTS_PATH
+python thermo_nerf/scripts/eval_script.py --dataset_path DATA_PATH --model_uri MODEL_PATH --output_folder RESULTS_PATH
 ```
 
 ## Render
@@ -52,7 +52,7 @@ For more information about it, check [Nerfstudio Documentation](https://docs.ner
 To render a path of a scpefic scene using a pretrained model, use the following script
 
 ```bash
-python scripts/render_video_script.py --dataset_path DATA_PATH --model_uri MODEL_PATH --camera_path_filename CAMERA_PATH_JSON --output_dir RENDER_RESULTS_PATH
+python thermo_nerf/scripts/render_video_script.py --dataset_path DATA_PATH --model_uri MODEL_PATH --camera_path_filename CAMERA_PATH_JSON --output_dir RENDER_RESULTS_PATH
 ```
 
 ## Contribute

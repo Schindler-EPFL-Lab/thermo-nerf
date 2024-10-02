@@ -33,10 +33,9 @@ from torchmetrics.functional import structural_similarity_index_measure
 from torchmetrics.image import PeakSignalNoiseRatio
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 
-from thermo_nerf.thermal_nerf.thermal_field import (
-    FieldHeadNamesT,
-    ThermalNerfactoTField,
-)
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
+from thermo_nerf.thermal_nerf.thermal_field import ThermalNerfactoTField
+from thermo_nerf.thermal_nerf.thermal_field_head import FieldHeadNamesT
 from thermo_nerf.thermal_nerf.thermal_metrics import mae_thermal
 from thermo_nerf.thermal_nerf.thermal_renderer import ThermalRenderer
 
@@ -80,7 +79,7 @@ class ThermalNerfModel(NerfactoModel):
         num_train_data: int,
         **kwargs,
     ) -> None:
-        if "thermal" not in metadata.keys():
+        if RenderedImageModality.THERMAL.value not in metadata.keys():
             raise ValueError("Thermal images not found in metadata.")
 
         super().__init__(config, scene_box, num_train_data, **kwargs)
@@ -254,8 +253,8 @@ class ThermalNerfModel(NerfactoModel):
 
         outputs = {
             "rgb": rgb,
-            "accumulation": accumulation,
-            "depth": depth,
+            RenderedImageModality.ACCUMULATION.value: accumulation,
+            RenderedImageModality.DEPTH.value: depth,
             "expected_depth": expected_depth,
         }
 
@@ -280,7 +279,7 @@ class ThermalNerfModel(NerfactoModel):
             )
         thermal = self.thermal_renderer(field_outputs[FieldHeadNamesT.THERMAL], weights)
 
-        outputs["thermal"] = thermal
+        outputs[RenderedImageModality.THERMAL.value] = thermal
 
         return outputs
 
@@ -298,7 +297,7 @@ class ThermalNerfModel(NerfactoModel):
         image = batch["image"].to(self.device)
         pred_rgb, gt_rgb = self.renderer_rgb.blend_background_for_loss_computation(
             pred_image=outputs["rgb"],
-            pred_accumulation=outputs["accumulation"],
+            pred_accumulation=outputs[RenderedImageModality.ACCUMULATION.value],
             gt_image=image,
         )
 
@@ -326,10 +325,12 @@ class ThermalNerfModel(NerfactoModel):
                     * torch.mean(outputs["rendered_pred_normal_loss"])
                 )
 
-        thermal_batch = batch["thermal"].to(self.device)
+        thermal_batch = batch[RenderedImageModality.THERMAL.value].to(self.device)
 
         if self.field.pass_thermal_gradients:
-            loss_dict["thermal"] = self.thermal_loss(outputs["thermal"], thermal_batch)
+            loss_dict[RenderedImageModality.THERMAL.value] = self.thermal_loss(
+                outputs[RenderedImageModality.THERMAL.value], thermal_batch
+            )
 
         return loss_dict
 
@@ -342,17 +343,27 @@ class ThermalNerfModel(NerfactoModel):
         :returns: two dicts one for the metrics and and another for the images.
         """
         metrics_dict, images_dict = super().get_image_metrics_and_images(outputs, batch)
-        thermal = colormaps.apply_float_colormap(outputs["thermal"], colormap="gray")
+
+        thermal = colormaps.apply_float_colormap(
+            outputs[RenderedImageModality.THERMAL.value], colormap="gray"
+        )
         gt_thermal = colormaps.apply_float_colormap(
-            batch["thermal"].to(self.device), colormap="gray"
+            batch[RenderedImageModality.THERMAL.value].to(self.device), colormap="gray"
         )
         combined_thermal = torch.cat([gt_thermal, thermal], dim=1)
 
-        images_dict.update({"thermal": combined_thermal})
+        images_dict.update({RenderedImageModality.THERMAL.value: thermal})
+        images_dict.update(
+            {RenderedImageModality.THERMAL_COMBINED.value: combined_thermal}
+        )
 
         # Switch images from [H, W, C] to [1, C, H, W] for metrics computations
-        gt_thermal = torch.moveaxis(batch["thermal"], -1, 0)[None, ...]
-        predicted_thermal = torch.moveaxis(outputs["thermal"], -1, 0)[None, ...]
+        gt_thermal = torch.moveaxis(batch[RenderedImageModality.THERMAL.value], -1, 0)[
+            None, ...
+        ]
+        predicted_thermal = torch.moveaxis(
+            outputs[RenderedImageModality.THERMAL.value], -1, 0
+        )[None, ...]
 
         psnr = self.psnr(gt_thermal, predicted_thermal)
         ssim = self.ssim(gt_thermal, predicted_thermal)

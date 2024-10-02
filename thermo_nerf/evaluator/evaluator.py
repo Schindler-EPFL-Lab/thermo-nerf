@@ -8,7 +8,7 @@ from nerfstudio.engine.trainer import TrainerConfig
 from nerfstudio.pipelines.base_pipeline import Pipeline
 from PIL import Image
 
-from thermo_nerf.render.renderer import RenderedImageModality
+from thermo_nerf.rendered_image_modalities import RenderedImageModality
 
 
 class Evaluator:
@@ -20,7 +20,7 @@ class Evaluator:
         pipeline: Pipeline,
         config: TrainerConfig,
         job_param_identifier: Optional[str] = None,
-        modalities_to_save: list[RenderedImageModality] = [RenderedImageModality.rgb],
+        modalities_to_save: list[RenderedImageModality] = [RenderedImageModality.RGB],
     ) -> None:
         """
         Initializes the parameters which are `output_file` to save the metrics, the
@@ -75,9 +75,6 @@ class Evaluator:
                 metrics_dict,
                 images_dict,
             ) = self._pipeline.model.get_image_metrics_and_images(outputs, batch)
-
-            # Save imgs
-            images_dict["rgb"] = images_dict.pop("img")
 
             for modality in self.modalities_to_save:
                 self._evaluation_images[modality].append(
@@ -166,7 +163,10 @@ class Evaluator:
         lpips_folder_path.joinpath(self.identifier + ".txt").write_text(
             json.dumps(self._metrics["lpips"], indent=2), "utf8"
         )
-        if RenderedImageModality.thermal in self.modalities_to_save:
+        if (
+            RenderedImageModality.THERMAL
+            or RenderedImageModality.THERMAL_COMBINED in self.modalities_to_save
+        ):
             psnr_folder_path.joinpath(self.identifier + "_thermal.txt").write_text(
                 json.dumps(self._metrics["psnr_thermal"], indent=2), "utf8"
             )
