@@ -19,19 +19,23 @@ from nerfstudio.model_components.renderers import (
 )
 from nerfstudio.model_components.scene_colliders import NearFarCollider
 from nerfstudio.model_components.shaders import NormalsShader
-from nerfstudio.models.nerfacto import NerfactoModel, NerfactoModelConfig
 from nerfstudio.utils import colormaps
 from torchmetrics.functional import structural_similarity_index_measure
 from torchmetrics.image import PeakSignalNoiseRatio
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 
+from thermo_nerf.nerfacto_config.thermal_nerfacto import (
+    ThermalNerfactoModel,
+    ThermalNerfactoModelConfig,
+)
 from thermo_nerf.rendered_image_modalities import RenderedImageModality
 from thermo_nerf.rgb_concat.concat_field import ConcatNerfactoTField
 from thermo_nerf.rgb_concat.rgbt_renderer import RGBTRenderer
+from thermo_nerf.thermal_nerf.thermal_metrics import mae_thermal
 
 
 @dataclass
-class ConcatNerfModelConfig(NerfactoModelConfig):
+class ConcatNerfModelConfig(ThermalNerfactoModelConfig):
     """Nerfacto Model Config"""
 
     _target: Type = field(default_factory=lambda: ConcatNerfModel)
@@ -43,9 +47,17 @@ class ConcatNerfModelConfig(NerfactoModelConfig):
     """Whether to pass thermal gradients."""
     camera_optimizer: CameraOptimizerConfig = CameraOptimizerConfig(mode="SO3xR3")
     """Config of the camera optimizer to use"""
+    max_temperature: float = 1.0
+    """Maximum temperature in the dataset."""
+    min_temperature: float = 0.0
+    """Minimum temperature in the dataset."""
+    threshold: float = 0.0
+    """Threshold for the thermal images that separated foreground from background."""
+    cold: bool = False
+    """Flag to indicate if the dataset includes cold temperatures."""
 
 
-class ConcatNerfModel(NerfactoModel):
+class ConcatNerfModel(ThermalNerfactoModel):
     """
     ConcatNerfModel extends NerfactoModel to support
     concatenated rgb and thermal images
@@ -62,6 +74,8 @@ class ConcatNerfModel(NerfactoModel):
     ) -> None:
         super().__init__(config, scene_box, num_train_data, **kwargs)
         self.config = config
+        self.max_temperature = config.max_temperature
+        self.min_temperature = config.min_temperature
 
     def populate_modules(self):
         """Set the fields and modules."""
@@ -234,7 +248,10 @@ class ConcatNerfModel(NerfactoModel):
         return metrics_dict
 
     def get_image_metrics_and_images(
-        self, outputs: dict[str, torch.Tensor], batch: dict[str, torch.Tensor]
+        self,
+        outputs: dict[str, torch.Tensor],
+        batch: dict[str, torch.Tensor],
+        threshold: float | None = None,
     ) -> tuple[dict[str, float], dict[str, torch.Tensor]]:
         gt_rgb = batch["image"].to(self.device)
         predicted_rgb = outputs[
@@ -262,6 +279,22 @@ class ConcatNerfModel(NerfactoModel):
 
         psnr = self.psnr(gt_rgb, predicted_rgb)
         ssim = self.ssim(gt_rgb, predicted_rgb)
+        mae_foreground = mae_thermal(
+            gt_rgb,
+            predicted_rgb,
+            self.config.cold,
+            self.max_temperature,
+            self.min_temperature,
+            threshold=threshold,
+        )
+        mae = mae_thermal(
+            gt_rgb,
+            predicted_rgb,
+            self.config.cold,
+            self.max_temperature,
+            self.min_temperature,
+            threshold=None,
+        )
 
         gt_rgb = torch.repeat_interleave(gt_rgb, 3, dim=1)
         predicted_rgb = torch.repeat_interleave(predicted_rgb, 3, dim=1)
@@ -271,6 +304,8 @@ class ConcatNerfModel(NerfactoModel):
         # all of these metrics will be logged as scalars
         metrics_dict = {"psnr": float(psnr.item()), "ssim": float(ssim)}  # type: ignore
         metrics_dict["lpips"] = float(lpips)
+        metrics_dict["mae_thermal_foreground"] = float(mae_foreground.item())
+        metrics_dict["mae_thermal"] = float(mae.item())
 
         images_dict = {
             RenderedImageModality.RGB.value: combined_rgb,

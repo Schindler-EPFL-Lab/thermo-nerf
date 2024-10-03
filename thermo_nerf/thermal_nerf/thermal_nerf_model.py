@@ -26,13 +26,16 @@ from nerfstudio.model_components.renderers import (
 )
 from nerfstudio.model_components.scene_colliders import NearFarCollider
 from nerfstudio.model_components.shaders import NormalsShader
-from nerfstudio.models.nerfacto import NerfactoModel, NerfactoModelConfig
 from nerfstudio.utils import colormaps
 from torch import Tensor, nn
 from torchmetrics.functional import structural_similarity_index_measure
 from torchmetrics.image import PeakSignalNoiseRatio
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 
+from thermo_nerf.nerfacto_config.thermal_nerfacto import (
+    ThermalNerfactoModel,
+    ThermalNerfactoModelConfig,
+)
 from thermo_nerf.rendered_image_modalities import RenderedImageModality
 from thermo_nerf.thermal_nerf.thermal_field import ThermalNerfactoTField
 from thermo_nerf.thermal_nerf.thermal_field_head import FieldHeadNamesT
@@ -41,7 +44,7 @@ from thermo_nerf.thermal_nerf.thermal_renderer import ThermalRenderer
 
 
 @dataclass
-class ThermalNerfModelConfig(NerfactoModelConfig):
+class ThermalNerfModelConfig(ThermalNerfactoModelConfig):
     """Nerfacto Model Config"""
 
     _target: Type = field(default_factory=lambda: ThermalNerfModel)
@@ -57,13 +60,11 @@ class ThermalNerfModelConfig(NerfactoModelConfig):
     """Maximum temperature in the dataset."""
     min_temperature: float = 0.0
     """Minimum temperature in the dataset."""
-    threshold: float = 0.0
-    """Threshold for the thermal images that separated foreground from background."""
     cold: bool = False
     """Flag to indicate if the dataset includes cold temperatures."""
 
 
-class ThermalNerfModel(NerfactoModel):
+class ThermalNerfModel(ThermalNerfactoModel):
     """
     ThermalNerfModel extends NerfactoModel to support thermal images
     as a separate modality from RGB images.
@@ -84,8 +85,6 @@ class ThermalNerfModel(NerfactoModel):
 
         super().__init__(config, scene_box, num_train_data, **kwargs)
         self.config = config
-        self.threshold = config.threshold
-        self.mae_thermal = mae_thermal
         self.max_temperature = config.max_temperature
         self.min_temperature = config.min_temperature
 
@@ -335,7 +334,10 @@ class ThermalNerfModel(NerfactoModel):
         return loss_dict
 
     def get_image_metrics_and_images(
-        self, outputs: dict[str, Tensor], batch: dict[str, Tensor]
+        self,
+        outputs: dict[str, Tensor],
+        batch: dict[str, Tensor],
+        threshold: float | None = None,
     ) -> tuple[dict[str, float], dict[str, Tensor]]:
         """
         Outputs a dictionary of metrics and images for rendering and viewing.
@@ -367,13 +369,21 @@ class ThermalNerfModel(NerfactoModel):
 
         psnr = self.psnr(gt_thermal, predicted_thermal)
         ssim = self.ssim(gt_thermal, predicted_thermal)
-        mae = self.mae_thermal(
+        mae_foreground = mae_thermal(
             gt_thermal,
             predicted_thermal,
-            self.threshold,
             self.config.cold,
             self.max_temperature,
             self.min_temperature,
+            threshold=threshold,
+        )
+        mae = mae_thermal(
+            gt_thermal,
+            predicted_thermal,
+            self.config.cold,
+            self.max_temperature,
+            self.min_temperature,
+            threshold=None,
         )
 
         # repeat channels for lpips
@@ -385,6 +395,7 @@ class ThermalNerfModel(NerfactoModel):
         metrics_dict["ssim_thermal"] = float(ssim)
 
         metrics_dict["lpips_thermal"] = float(lpips)
-        metrics_dict["mae_thermal"] = mae
+        metrics_dict["mae_thermal_foreground"] = float(mae_foreground.item())
+        metrics_dict["mae_thermal"] = float(mae.item())
 
         return metrics_dict, images_dict

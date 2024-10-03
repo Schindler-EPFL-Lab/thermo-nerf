@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import tyro
@@ -6,11 +6,12 @@ from nerfstudio.scripts.train import main
 
 from thermo_nerf.evaluator.evaluator import Evaluator
 from thermo_nerf.model_type import ModelType
-from thermo_nerf.nerfacto_config.config_nerfacto import nerfacto_config
+from thermo_nerf.nerfacto_config.config_nerfacto import thermalnerfacto_config
 from thermo_nerf.render.renderer import Renderer
 from thermo_nerf.rendered_image_modalities import RenderedImageModality
 from thermo_nerf.rgb_concat.config_concat_nerfacto import concat_nerf_config
-from thermo_nerf.thermal_nerf.config_thermal_nerf import thermal_nerftrack_config
+from thermo_nerf.thermal_nerf.calculate_threshold import calculate_threshold
+from thermo_nerf.thermal_nerf.config_thermal_nerf import thermal_nerf_config
 
 
 @dataclass
@@ -29,10 +30,18 @@ class TrainingParameters:
 
     seed: int = 0
     """Seed for the random number generator"""
+    temperature_bounds: list = field(default_factory=lambda: [1.0, 0.0])
+    """Temperature bounds for the dataset"""
+
+    cold: bool = False
+    """Flag to use settings for cold temperatures"""
+
+    def threshold(self):
+        return calculate_threshold(self.data, self.model_type)
 
     def __post_init__(self) -> None:
         if self.model_type == ModelType.THERMONERF:
-            self.model = thermal_nerftrack_config
+            self.model = thermal_nerf_config
             self.modalities_to_save = [
                 RenderedImageModality.RGB,
                 RenderedImageModality.THERMAL,
@@ -40,7 +49,7 @@ class TrainingParameters:
             ]
 
         if self.model_type == ModelType.NERFACTO:
-            self.model = nerfacto_config
+            self.model = thermalnerfacto_config
             self.modalities_to_save = [
                 RenderedImageModality.RGB,
             ]
@@ -59,6 +68,10 @@ if __name__ == "__main__":
     parameters.model.max_num_iterations = parameters.max_num_iterations
     parameters.model.data = parameters.data
     parameters.model.viewer.quit_on_train_completion = True
+    parameters.model.pipeline.model.max_temperature = parameters.temperature_bounds[0]
+    parameters.model.pipeline.model.min_temperature = parameters.temperature_bounds[1]
+    parameters.model.pipeline.model.cold = parameters.cold
+
     main(parameters.model)
 
     pipeline, config = Renderer.extract_pipeline(
@@ -68,6 +81,7 @@ if __name__ == "__main__":
         pipeline=pipeline,
         config=config,
         modalities_to_save=parameters.modalities_to_save,
+        threshold=parameters.threshold(),
     )
 
     evaluator.save_metrics(output_folder=parameters.metrics_output_folder)
