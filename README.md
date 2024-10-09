@@ -17,6 +17,9 @@ The ThermoNeRF package is built on top of [Nerfstudio](https://github.com/nerfst
 
 We introduce [ThermoScenes](https://zenodo.org/records/10835108?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjhlOWI4MTVmLWZlOGUtNDA0Mi1hMWE1LWM5OWYwODE1MjNkNSIsImRhdGEiOnt9LCJyYW5kb20iOiI3NDUwNzM3ZjAxNTlkZWVjNzI1NWY0MmYyMTQxMzdkMyJ9.3Ga9svyICCtX8FwVOWx0NSCx8AHzjb-aqbO1VRLVfUf_CK6fp7sPz2WopezuH3iPxrTag7ivoG1p56ND1eNpVg), a new dataset to palliate the lack of available RGB+thermal datasets for scene reconstruction.
 
+We also [provide instructions](thermo_scenes/docs/Collect_new_dataset.md) on how to build your own thermal scene.
+If you create a new scene and wish to share it with everyone, send it to us and we may add it to ThermoScenes.
+
 ## Installation
 
 ThermoNeRF was tested under Python 3.10 with torch `1.13.1`.
