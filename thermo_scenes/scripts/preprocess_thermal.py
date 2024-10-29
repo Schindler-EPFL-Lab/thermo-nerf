@@ -3,7 +3,7 @@ from pathlib import Path
 
 import tyro
 
-from thermo_nerf.flir_thermal_images.custom_flir import CustomFlir
+from thermo_scenes.flir_thermal_images.custom_flir import CustomFlir
 
 
 @dataclass

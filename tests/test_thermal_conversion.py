@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from numpy.testing import assert_almost_equal
 
-from thermo_nerf.flir_thermal_images.thermal_visualiser import ThermalVisualiser
+from thermo_scenes.flir_thermal_images.thermal_visualiser import ThermalVisualiser
 
 
 class CustomThermalVisualiser(ThermalVisualiser):

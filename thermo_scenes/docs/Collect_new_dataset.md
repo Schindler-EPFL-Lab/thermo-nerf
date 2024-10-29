@@ -22,7 +22,7 @@ You must use FLIR cloud service to transfer the images to your computer:
 - Then, download one by one the RGB DC images by opening them in the gallery.
   This step is necessary to align the RGB and thermal image; using the MSX image to extract both will result in non-aligned RGB/thermal images.
 
-Save all your MSX images to one folder and your RGB into another one.
+Save all your MSX images to one folder named "MSX" and your RGB into another one.
 
 ## Data extraction
 
@@ -87,6 +87,37 @@ thermoscenes_rename_files --path-to-folder <path_to_folders>
 With `<path_to_folders>` the folder that contains the four folders created earlier.
 The renamed files are saved in a folder named "\<FOLDER NAME\>_processed".
 
+To finalize the creation of the dataset, copy all processed thermal and rgb images (train and eval) in (respectively) the folders "images" and "thermal".
+You should have a structure like this one in the end:
+
+```python
+your_scene
+  |--images  # includes the RGB images
+    |--frame_eval_0000.jpg
+    |--...
+    |--frame_eval_N.jpg
+    |--frame_train_0000.jpg
+    |--...
+    |--frame_train_N2.jpg
+  |--thermal  # includes the thermal images
+    |--frame_eval_0000.PNG
+    |--...
+    |--frame_eval_N.PNG
+    |--frame_train_0000.PNG
+    |--...
+    |--frame_train_N2.PNG
+  |--msx  # includes the MSX images
+    |--frame_eval_0000.jpg
+    |--...
+    |--frame_eval_N.jpg
+    |--frame_train_0000.jpg
+    |--...
+    |--frame_train_N2.jpg
+  |--temperature_bounds.json
+```
+
+> Make sure that the `temperature_bounds.json` file is included.
+
 ## Get poses with COLMAP
 
 To run COLMAP on the dataset you created:
@@ -95,6 +126,34 @@ To run COLMAP on the dataset you created:
 thermoscenes_images_to_nerf_dataset --matching_method exhaustive --data <path_to_processed_rgb_train_data> --output-dir <output_folder> --num-downscales 0 --eval-data <path_to_processed_rgb_eval_data> --update-colmap-json
 ```
 
-In <output_folder> create a folder named "thermal" and copy all processed/renamed thermal images to it.
+You should get a file named `transforms_thermal.json` that you can put in the root folder of your scene.
+You should end up with a data folder looking like:
+
+```txt
+your_scene
+  |--images
+    |--frame_eval_0000.jpg
+    |--...
+    |--frame_eval_N.jpg
+    |--frame_train_0000.jpg
+    |--...
+    |--frame_train_N2.jpg
+  |--thermal
+    |--frame_eval_0000.PNG
+    |--...
+    |--frame_eval_N.PNG
+    |--frame_train_0000.PNG
+    |--...
+    |--frame_train_N2.PNG
+  |--msx
+    |--frame_eval_0000.jpg
+    |--...
+    |--frame_eval_N.jpg
+    |--frame_train_0000.jpg
+    |--...
+    |--frame_train_N2.jpg
+  |--temperature_bounds.json
+  |--transforms_thermal.json
+```
 
 The new scene dataset is complete.
