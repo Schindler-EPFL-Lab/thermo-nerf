@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import tyro
 
-from rebel_nerf.flir_themral_images.thermal_visualiser import ThermalVisualiser
+from thermo_scenes.flir_thermal_images.thermal_visualiser import ThermalVisualiser
 
 
 @dataclass

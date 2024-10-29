@@ -19,7 +19,7 @@ packages = ["thermo_nerf", "thermo_scenes"]
 
 [tool.isort]
 profile = "black"
-known_third_party = ["nerfstudio"]
+known_third_party = ["nerfstudio", "FlirImageExtractor"]
 
 [project.scripts]
 thermoscenes_images_to_nerf_dataset = "thermo_scenes.scripts.images_to_nerf_dataset:main"
