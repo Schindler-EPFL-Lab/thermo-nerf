@@ -50,7 +50,7 @@ To create the CSV files, rgb images, and the greyscale raw temperature images, r
 the following command, with `<path_to_msx>` the path to the MSX images, and `<path_to_output_folder>` the path where the temperature and rgb images, and csv files extracted will be saved.
 
 ```bash
-thermoscenes_preprocess_thermal.py --path-to-msx-images <path_to_msx> --path-to-output-folder <path_to_output_folder>
+thermoscenes_preprocess_thermal.py --msx-images <path_to_msx> --output-folder <path_to_output_folder>
 ```
 
 > If your MSX images are in more than one folder, do it for all folders, and make sure that the temperature are rescaled to the same range in the next step.
