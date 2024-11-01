@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -47,10 +48,40 @@ class CustomFlir(FlirImageExtractor):
     in the dataset.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, path_to_msx_images: Path, path_to_output_folder: Path) -> None:
         super().__init__()
+
+        path_to_output_folder.mkdir(exist_ok=True, parents=True)
+        if path_to_msx_images != path_to_output_folder:
+            shutil.copytree(
+                path_to_msx_images,
+                Path(path_to_output_folder, "msx"),
+                dirs_exist_ok=True,
+            )
+
+        output_json_path = Path(path_to_output_folder, "temperature_bounds.json")
+
+        output_rgb_folder = Path(path_to_output_folder, "rgb")
+        output_rgb_folder.mkdir(parents=True, exist_ok=True)
+
+        output_thermal_folder = Path(path_to_output_folder, "thermal")
+        output_thermal_folder.mkdir(parents=True, exist_ok=True)
+
+        output_csv_folder = Path(path_to_output_folder, "csv")
+        output_csv_folder.mkdir(parents=True, exist_ok=True)
+
         self.absolute_max_temperature = None
         self.absolute_min_temperature = None
+
+        for img_path in path_to_msx_images.iterdir():
+            self.process_image(Path(path_to_msx_images, img_path.name))
+            self.export_thermal_to_csv(Path(output_csv_folder, img_path.stem + ".csv"))
+            self.save_rgb_images(output_rgb_folder)
+
+        self.save_normalised_thermal_images(
+            str(output_thermal_folder), str(output_csv_folder)
+        )
+        self.save_temperature_bounds(str(output_json_path))
 
     def save_rgb_images(self, path_to_rgb: Path) -> None:
         """
@@ -60,9 +91,7 @@ class CustomFlir(FlirImageExtractor):
 
         img_visual = Image.fromarray(rgb_np)
 
-        fn_prefix = Path(self.flir_img_filename).name
-
-        image_filename = Path(path_to_rgb, str(fn_prefix).split(".")[0] + ".PNG")
+        image_filename = Path(path_to_rgb, Path(self.flir_img_filename).stem + ".PNG")
 
         img_visual.save(image_filename)
 
@@ -132,7 +161,7 @@ class CustomFlir(FlirImageExtractor):
             )
 
             thermal_filename = Path(
-                path_to_thermal_images_curated, str(filename).split(".")[0] + ".PNG"
+                path_to_thermal_images_curated, Path(filename).stem + ".PNG"
             )
 
             img_thermal.save(str(thermal_filename))

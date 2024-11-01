@@ -47,10 +47,10 @@ sudo pip install numpy matplotlib pillow
 ### Extact raw data
 
 To create the CSV files, rgb images, and the greyscale raw temperature images, run
-the following command, with `<path_to_thermal>` the path to the MSX images, and `<path_to_output_thermal>`, `<path_to_csv>`, and `<path_to_rgb>` the paths where the temperature and rgb images, and csv files extracted will be saved.
+the following command, with `<path_to_thermal>` the path to the MSX images, and `<path_to_output_folder>` the path where the temperature and rgb images, and csv files extracted will be saved.
 
 ```bash
-thermoscenes_preprocess_thermal.py --path-to-thermal-images <path_to_thermal> --path-to-thermal-images-curated <path_to_output_thermal> --path-to-rgb <path_to_rgb> --path-to-csv-files  <path_to_csv>
+thermoscenes_preprocess_thermal.py --path-to-thermal-images <path_to_thermal> --path-to-output-folder <path_to_output_folder>
 ```
 
 > If your MSX images are in more than one folder, do it for all folders, and make sure that the temperature are rescaled to the same range in the next step.
