@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import numpy.typing as npt
 from nerfstudio.data.datasets.base_dataset import InputDataset
@@ -23,11 +25,19 @@ class ConcatDataset(InputDataset):
             pil_image = pil_image.resize(newsize, resample=Image.BILINEAR)
         image = np.array(pil_image, dtype="uint8")  # shape is (h, w) or (h, w, 3 or 4)
 
-        thermal_path = (
-            str(image_filename).replace("images/", "thermal/").replace(".jpg", ".PNG")
-        )
+        thermal_path = Path(image_filename.parent.parent, "thermal")
+        thermal_images = [f for f in thermal_path.glob(image_filename.stem)]
 
-        thermal_image = Image.open(thermal_path).convert("L")
+        if len(thermal_images) > 1:
+            raise RuntimeError(
+                "To many thermal file corresponding to ",
+                thermal_path.name,
+                ". Corresponding files:",
+                str(thermal_images),
+            )
+
+        thermal_image_path = thermal_images[0]
+        thermal_image = Image.open(thermal_image_path).convert("L")
         thermal_image = np.array(thermal_image, dtype="uint8")
         image = np.concatenate([image, thermal_image[..., None]], axis=-1)
 

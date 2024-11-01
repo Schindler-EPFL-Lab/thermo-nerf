@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import tyro
+from nerfstudio.process_data.process_data_utils import list_images
 from PIL import Image as PILImage
 from PIL.Image import Image
 
@@ -29,26 +30,10 @@ def load_images(
         if not dir_path.exists():
             raise Exception(f"Error: Directory {dir_path} not found in {base_path}")
 
-    rgb_train_images = [
-        Path(rgb_train_dir, f)
-        for f in rgb_train_dir.iterdir()
-        if f.suffix in [".PNG", ".jpg", ".jpeg"]
-    ]
-    thermal_train_images = [
-        Path(thermal_train_dir, f)
-        for f in thermal_train_dir.iterdir()
-        if f.suffix in [".PNG", ".jpg", ".jpeg"]
-    ]
-    rgb_eval_images = [
-        Path(rgb_eval_dir, f)
-        for f in rgb_eval_dir.iterdir()
-        if f.suffix in [".PNG", ".jpg", ".jpeg"]
-    ]
-    thermal_eval_images = [
-        Path(thermal_eval_dir, f)
-        for f in thermal_eval_dir.iterdir()
-        if f.suffix in [".PNG", ".jpg", ".jpeg"]
-    ]
+    rgb_train_images = list_images(rgb_train_dir)
+    thermal_train_images = list_images(thermal_train_dir)
+    rgb_eval_images = list_images(rgb_eval_dir)
+    thermal_eval_images = list_images(thermal_eval_dir)
 
     if len(rgb_train_images) != len(thermal_train_images):
         raise Exception(
@@ -78,7 +63,11 @@ def resize_image(image_path: Path, target_size: tuple) -> Image:
 
 
 def save_images(
-    images: list, base_path: Path, dir_name_rgb: str, dir_name_thermal: str, prefix: str
+    images: list[tuple[Path, Path]],
+    base_path: Path,
+    dir_name_rgb: str,
+    dir_name_thermal: str,
+    prefix: str,
 ) -> None:
     """
     Resizes and saves images in the `images` list
@@ -95,8 +84,8 @@ def save_images(
     Path(base_path, dir_name_thermal).mkdir(exist_ok=True)
 
     for index, (rgb_path, thermal_path) in enumerate(images, start=1):
-        rgb_filename = f"{prefix}_{index:05d}.PNG"
-        thermal_filename = f"{prefix}_{index:05d}.PNG"
+        rgb_filename = f"{prefix}_{index:05d}.png"
+        thermal_filename = f"{prefix}_{index:05d}.png"
 
         with PILImage.open(thermal_path) as thermal_img:
             target_size = (thermal_img.width, thermal_img.height)

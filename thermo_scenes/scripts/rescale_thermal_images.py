@@ -121,7 +121,7 @@ def process_images(
         output_folder.mkdir()
 
     for filename in input_folder.iterdir():
-        if filename.suffix not in [".PNG", ".JPG", ".jpeg"]:
+        if filename.suffix not in [".PNG", ".JPG", ".jpeg", ".png", ".jpg"]:
             continue
 
         img_path = Path(input_folder, filename)

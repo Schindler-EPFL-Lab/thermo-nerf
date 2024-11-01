@@ -47,10 +47,10 @@ sudo pip install numpy matplotlib pillow
 ### Extact raw data
 
 To create the CSV files, rgb images, and the greyscale raw temperature images, run
-the following command, with `<path_to_thermal>` the path to the MSX images, and `<path_to_output_folder>` the path where the temperature and rgb images, and csv files extracted will be saved.
+the following command, with `<path_to_msx>` the path to the MSX images, and `<path_to_output_folder>` the path where the temperature and rgb images, and csv files extracted will be saved.
 
 ```bash
-thermoscenes_preprocess_thermal.py --path-to-thermal-images <path_to_thermal> --path-to-output-folder <path_to_output_folder>
+thermoscenes_preprocess_thermal.py --path-to-msx-images <path_to_msx> --path-to-output-folder <path_to_output_folder>
 ```
 
 > If your MSX images are in more than one folder, do it for all folders, and make sure that the temperature are rescaled to the same range in the next step.
@@ -87,35 +87,6 @@ thermoscenes_rename_files --path-to-folder <path_to_folders>
 With `<path_to_folders>` the folder that contains the four folders created earlier.
 The renamed files are saved in a folder named "\<FOLDER NAME\>_processed".
 
-To finalize the creation of the dataset, copy all processed thermal and rgb images (train and eval) in (respectively) the folders "images" and "thermal".
-You should have a structure like this one in the end:
-
-```python
-your_scene
-  |--images  # includes the RGB images
-    |--frame_eval_0000.jpg
-    |--...
-    |--frame_eval_N.jpg
-    |--frame_train_0000.jpg
-    |--...
-    |--frame_train_N2.jpg
-  |--thermal  # includes the thermal images
-    |--frame_eval_0000.PNG
-    |--...
-    |--frame_eval_N.PNG
-    |--frame_train_0000.PNG
-    |--...
-    |--frame_train_N2.PNG
-  |--msx  # includes the MSX images
-    |--frame_eval_0000.jpg
-    |--...
-    |--frame_eval_N.jpg
-    |--frame_train_0000.jpg
-    |--...
-    |--frame_train_N2.jpg
-  |--temperature_bounds.json
-```
-
 > Make sure that the `temperature_bounds.json` file is included.
 
 ## Get poses with COLMAP
@@ -123,10 +94,11 @@ your_scene
 To run COLMAP on the dataset you created:
 
 ```bash
-thermoscenes_images_to_nerf_dataset --matching_method exhaustive --data <path_to_processed_rgb_train_data> --output-dir <output_folder> --num-downscales 0 --eval-data <path_to_processed_rgb_eval_data> --update-colmap-json
+thermoscenes_images_to_nerf_dataset --matching_method exhaustive --thermo-scene-data <path_to_root_folder_of_dataset> --output-dir <output_folder> --num-downscales 0 --update-colmap-json
 ```
 
 You should get a file named `transforms_thermal.json` that you can put in the root folder of your scene.
+RGB images process with COLMAP should be saved automatically in the folder "images", and thermal images should be saved in a "thermal" folder.
 You should end up with a data folder looking like:
 
 ```txt
@@ -139,12 +111,12 @@ your_scene
     |--...
     |--frame_train_N2.jpg
   |--thermal
-    |--frame_eval_0000.PNG
+    |--frame_eval_0000.png
     |--...
-    |--frame_eval_N.PNG
-    |--frame_train_0000.PNG
+    |--frame_eval_N.png
+    |--frame_train_0000.png
     |--...
-    |--frame_train_N2.PNG
+    |--frame_train_N2.png
   |--msx
     |--frame_eval_0000.jpg
     |--...
