@@ -52,7 +52,7 @@ class CustomFlir(FlirImageExtractor):
         super().__init__()
 
         path_to_output_folder.mkdir(exist_ok=True, parents=True)
-        if path_to_msx_images != path_to_output_folder:
+        if path_to_msx_images.parent != path_to_output_folder:
             shutil.copytree(
                 path_to_msx_images,
                 Path(path_to_output_folder, "msx"),
@@ -91,7 +91,7 @@ class CustomFlir(FlirImageExtractor):
 
         img_visual = Image.fromarray(rgb_np)
 
-        image_filename = Path(path_to_rgb, Path(self.flir_img_filename).stem + ".PNG")
+        image_filename = Path(path_to_rgb, Path(self.flir_img_filename).stem + ".png")
 
         img_visual.save(image_filename)
 
@@ -118,7 +118,7 @@ class CustomFlir(FlirImageExtractor):
             gray_scale_image = temperature.reshape(640, 480).astype("uint8")
 
             Image.fromarray(gray_scale_image, mode="L").save(
-                Path(path_to_thermal_images_curated, Path(path).stem + ".PNG")
+                Path(path_to_thermal_images_curated, Path(path).stem + ".png")
             )
 
     def save_normalised_coloured_thermal_images(
@@ -161,7 +161,7 @@ class CustomFlir(FlirImageExtractor):
             )
 
             thermal_filename = Path(
-                path_to_thermal_images_curated, Path(filename).stem + ".PNG"
+                path_to_thermal_images_curated, Path(filename).stem + ".png"
             )
 
             img_thermal.save(str(thermal_filename))
