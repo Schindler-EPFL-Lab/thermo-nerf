@@ -42,12 +42,9 @@ def save_image_with_colormap(
         cbar.set_label("Temperature", rotation=270, labelpad=15)
         cbar.ax.yaxis.label.set_fontsize(18)
         cbar.ax.tick_params(labelsize=18)
-    plt.savefig(
-        output_img,
-        transparent=True,
-        bbox_inches="tight",
-        pad_inches=0,
-    )
+    plt.savefig(output_img, transparent=True, bbox_inches="tight", pad_inches=0)
+    origin_size_image = Image.fromarray((colored_image * 255).astype(np.uint8))
+    origin_size_image.save(Path(output_img.parent, "same_size_image", output_img.name))
     if show:
         plt.show()
 
@@ -65,6 +62,8 @@ def main(images: Path, output_dir: Path, temperatures_bound: Path) -> None:
         raise ValueError("The images_path and output_dir cannot be the same.")
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    same_size_image_output_dir = Path(output_dir, "same_size_image")
+    same_size_image_output_dir.mkdir(parents=True, exist_ok=True)
 
     for image_path in images.iterdir():
 
