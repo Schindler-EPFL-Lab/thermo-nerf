@@ -6,7 +6,7 @@ from nerfstudio.utils.io import load_from_json
 from thermo_nerf.model_type import ModelType
 
 
-def calculate_threshold(data: Path, model_type: ModelType):
+def calculate_threshold(data: Path, model_type: ModelType) -> float:
     """
     Calculates the threshold that differentiates between
     the foreground and background of the thermal `data`.
