@@ -10,9 +10,10 @@
     "python.testing.unittestEnabled": true,
     "[python]": {
         "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
         },
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.rulers": [
             88
         ],
@@ -22,10 +23,6 @@
         "reportUndefinedVariable": "warning"
     },
     "editor.formatOnSave": true,
-    "isort.args": [
-        "--profile",
-        "black"
-    ],
     "python.analysis.diagnosticMode": "openFilesOnly",
     "errorLens.enabledDiagnosticLevels": [
         "error",
