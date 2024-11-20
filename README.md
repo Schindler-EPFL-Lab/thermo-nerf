@@ -62,7 +62,7 @@ python thermo_nerf/scripts/render_video_script.py --dataset_path DATA_PATH --mod
 
 We welcome contributions! Feel free to fork and submit PRs.
 
-We format code using [black](https://pypi.org/project/black/) and follow PEP8.
+We format code using [ruff](https://docs.astral.sh/ruff) and follow PEP8.
 The code needs to be type annotated and following our documentation style.
 
 ## How to cite
