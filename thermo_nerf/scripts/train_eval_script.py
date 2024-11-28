@@ -1,3 +1,7 @@
+import json
+import os
+import shutil
+import stat
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -62,6 +66,18 @@ class TrainingParameters:
 
 if __name__ == "__main__":
     parameters = tyro.cli(TrainingParameters)
+
+    if parameters.model_type == ModelType.NERFACTO:
+        tmp_folder = Path("./data_folder/")
+        shutil.copytree(src=parameters.data, dst=tmp_folder)
+        os.chmod(tmp_folder / "transforms.json", stat.S_IRWXU)
+        with open(tmp_folder / "transforms.json", "r") as f:
+            config = json.load(f)
+        for frame in config["frames"]:
+            frame["file_path"] = frame["thermal_file_path"]
+        with open(tmp_folder / "transforms.json", "w") as f:
+            json.dump(config, f, indent=4)
+        parameters.data = tmp_folder
 
     parameters.model.experiment_name = parameters.experiment_name
     parameters.model.output_dir = parameters.model_output_folder
