@@ -26,7 +26,7 @@ class ConcatDataset(InputDataset):
         image = np.array(pil_image, dtype="uint8")  # shape is (h, w) or (h, w, 3 or 4)
 
         thermal_path = Path(image_filename.parent.parent, "thermal")
-        thermal_images = [f for f in thermal_path.glob(image_filename.stem)]
+        thermal_images = [f for f in thermal_path.glob(image_filename.stem+".*")]
 
         if len(thermal_images) > 1:
             raise RuntimeError(
