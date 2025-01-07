@@ -4,8 +4,13 @@ import shutil
 import stat
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Literal
 
 import tyro
+from nerfstudio.data.datamanagers.base_datamanager import \
+    VanillaDataManagerConfig
+from nerfstudio.data.dataparsers.nerfstudio_dataparser import \
+    NerfstudioDataParserConfig
 from nerfstudio.scripts.train import main
 
 from thermo_nerf.evaluator.evaluator import Evaluator
@@ -16,6 +21,7 @@ from thermo_nerf.rendered_image_modalities import RenderedImageModality
 from thermo_nerf.rgb_concat.config_concat_nerfacto import concat_nerf_config
 from thermo_nerf.thermal_nerf.calculate_threshold import calculate_threshold
 from thermo_nerf.thermal_nerf.config_thermal_nerf import thermal_nerf_config
+from thermo_nerf.thermal_nerf.thermal_nerf_model import ThermalNerfModelConfig
 
 
 @dataclass
@@ -39,6 +45,16 @@ class TrainingParameters:
 
     cold: bool = False
     """Flag to use settings for cold temperatures"""
+    camera_optimizer_mode: Literal["off", "SO3xR3", "SE3"] = "SO3xR3"
+    """Pose optimization strategy to use. Recommended to be SO3xR3."""
+    eval_mode: Literal["fraction", "filename", "interval", "all"] = "filename"
+    """
+    The method to use for splitting the dataset into train and eval.
+    Fraction splits based on a percentage for train and the remaining for eval.
+    Filename splits based on filenames containing train/eval.
+    Interval uses every nth frame for eval.
+    All uses all the images for any split.
+    """
 
     def threshold(self):
         return calculate_threshold(self.data, self.model_type)
@@ -84,9 +100,14 @@ if __name__ == "__main__":
     parameters.model.max_num_iterations = parameters.max_num_iterations
     parameters.model.data = parameters.data
     parameters.model.viewer.quit_on_train_completion = True
+    assert isinstance(parameters.model.pipeline.model, ThermalNerfModelConfig)
     parameters.model.pipeline.model.max_temperature = parameters.temperature_bounds[0]
     parameters.model.pipeline.model.min_temperature = parameters.temperature_bounds[1]
     parameters.model.pipeline.model.cold = parameters.cold
+    parameters.model.pipeline.model.camera_optimizer_mode = parameters.camera_optimizer_mode  # noqa: E501
+    assert isinstance(parameters.model.pipeline.datamanager, VanillaDataManagerConfig)
+    assert isinstance(parameters.model.pipeline.datamanager.dataparser, NerfstudioDataParserConfig)  # noqa: E501
+    parameters.model.pipeline.datamanager.dataparser.eval_mode = parameters.eval_mode
 
     main(parameters.model)
 

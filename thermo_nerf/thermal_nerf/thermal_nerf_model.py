@@ -3,27 +3,20 @@ from typing import Type
 
 import numpy as np
 import torch
-from nerfstudio.cameras.camera_optimizers import CameraOptimizer, CameraOptimizerConfig
+from nerfstudio.cameras.camera_optimizers import CameraOptimizer
 from nerfstudio.cameras.rays import RayBundle, RaySamples
 from nerfstudio.data.scene_box import SceneBox
 from nerfstudio.field_components.field_heads import FieldHeadNames
 from nerfstudio.field_components.spatial_distortions import SceneContraction
 from nerfstudio.fields.density_fields import HashMLPDensityField
 from nerfstudio.model_components.losses import (
-    MSELoss,
-    interlevel_loss,
-    scale_gradients_by_distance_squared,
-)
-from nerfstudio.model_components.ray_samplers import (
-    ProposalNetworkSampler,
-    UniformSampler,
-)
-from nerfstudio.model_components.renderers import (
-    AccumulationRenderer,
-    DepthRenderer,
-    NormalsRenderer,
-    RGBRenderer,
-)
+    MSELoss, interlevel_loss, scale_gradients_by_distance_squared)
+from nerfstudio.model_components.ray_samplers import (ProposalNetworkSampler,
+                                                      UniformSampler)
+from nerfstudio.model_components.renderers import (AccumulationRenderer,
+                                                   DepthRenderer,
+                                                   NormalsRenderer,
+                                                   RGBRenderer)
 from nerfstudio.model_components.scene_colliders import NearFarCollider
 from nerfstudio.model_components.shaders import NormalsShader
 from nerfstudio.utils import colormaps
@@ -33,9 +26,7 @@ from torchmetrics.image import PeakSignalNoiseRatio
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 
 from thermo_nerf.nerfacto_config.thermal_nerfacto import (
-    ThermalNerfactoModel,
-    ThermalNerfactoModelConfig,
-)
+    ThermalNerfactoModel, ThermalNerfactoModelConfig)
 from thermo_nerf.rendered_image_modalities import RenderedImageModality
 from thermo_nerf.thermal_nerf.thermal_field import ThermalNerfactoTField
 from thermo_nerf.thermal_nerf.thermal_field_head import FieldHeadNamesT
@@ -54,8 +45,6 @@ class ThermalNerfModelConfig(ThermalNerfactoModelConfig):
     """optimisation weight of the thermal loss."""
     pass_thermal_gradients: bool = True
     """Whether to pass thermal gradients."""
-    camera_optimizer: CameraOptimizerConfig = CameraOptimizerConfig(mode="SO3xR3")
-    """Config of the camera optimizer to use"""
     max_temperature: float = 1.0
     """Maximum temperature in the dataset."""
     min_temperature: float = 0.0
