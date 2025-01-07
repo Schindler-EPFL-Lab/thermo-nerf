@@ -67,7 +67,13 @@ class Evaluator:
             # Generate camera indices based on the number of camera_to_worlds
             camera_indices = torch.arange(cameras.camera_to_worlds.shape[0])
             camera_ray_bundle = cameras.generate_rays(camera_indices)
-
+            camera_ray_bundle_flatten = camera_ray_bundle.flatten()
+            self._pipeline.model.camera_optimizer.apply_to_raybundle(
+                camera_ray_bundle_flatten
+            )
+            camera_ray_bundle = camera_ray_bundle_flatten.reshape(
+                camera_ray_bundle.shape
+            )
             assert isinstance(self._pipeline.model, ThermalNerfactoModel)
 
             outputs = self._pipeline.model.get_outputs_for_camera_ray_bundle(

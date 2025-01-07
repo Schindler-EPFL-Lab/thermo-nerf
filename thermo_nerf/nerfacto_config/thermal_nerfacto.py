@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Literal, Type
 
 import torch
+from nerfstudio.cameras.camera_optimizers import CameraOptimizerConfig
 from nerfstudio.data.scene_box import SceneBox
 from nerfstudio.models.nerfacto import NerfactoModel, NerfactoModelConfig
 from torch import Tensor
@@ -20,6 +21,8 @@ class ThermalNerfactoModelConfig(NerfactoModelConfig):
     """Minimum temperature in the dataset."""
     cold: bool = False
     """Flag to indicate if the dataset includes cold temperatures."""
+    camera_optimizer_mode: Literal["off", "SO3xR3", "SE3"] = "SO3xR3"
+    """Pose optimization strategy to use. Recommended to be SO3xR3."""
 
 
 class ThermalNerfactoModel(NerfactoModel):
@@ -33,6 +36,9 @@ class ThermalNerfactoModel(NerfactoModel):
         num_train_data: int,
         **kwargs,
     ) -> None:
+        config.camera_optimizer = CameraOptimizerConfig(
+            mode=config.camera_optimizer_mode
+        )
         super().__init__(config, scene_box, num_train_data, **kwargs)
         self.config = config
         self.max_temperature = config.max_temperature
