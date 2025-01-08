@@ -7,21 +7,19 @@ from pathlib import Path
 from typing import Literal
 
 import tyro
-from nerfstudio.data.datamanagers.base_datamanager import \
-    VanillaDataManagerConfig
-from nerfstudio.data.dataparsers.nerfstudio_dataparser import \
-    NerfstudioDataParserConfig
+from nerfstudio.data.datamanagers.base_datamanager import VanillaDataManagerConfig
+from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
 from nerfstudio.scripts.train import main
 
 from thermo_nerf.evaluator.evaluator import Evaluator
 from thermo_nerf.model_type import ModelType
 from thermo_nerf.nerfacto_config.config_nerfacto import thermalnerfacto_config
+from thermo_nerf.nerfacto_config.thermal_nerfacto import ThermalNerfactoModelConfig
 from thermo_nerf.render.renderer import Renderer
 from thermo_nerf.rendered_image_modalities import RenderedImageModality
 from thermo_nerf.rgb_concat.config_concat_nerfacto import concat_nerf_config
 from thermo_nerf.thermal_nerf.calculate_threshold import calculate_threshold
 from thermo_nerf.thermal_nerf.config_thermal_nerf import thermal_nerf_config
-from thermo_nerf.thermal_nerf.thermal_nerf_model import ThermalNerfModelConfig
 
 
 @dataclass
@@ -68,7 +66,10 @@ class TrainingParameters:
                 RenderedImageModality.THERMAL_COMBINED,
             ]
 
-        if self.model_type == ModelType.NERFACTO:
+        if (
+            self.model_type == ModelType.NERFACTO
+            or self.model_type == ModelType.THERMALNERFACTO
+        ):
             self.model = thermalnerfacto_config
             self.modalities_to_save = [
                 RenderedImageModality.RGB,
@@ -83,7 +84,7 @@ class TrainingParameters:
 if __name__ == "__main__":
     parameters = tyro.cli(TrainingParameters)
 
-    if parameters.model_type == ModelType.NERFACTO:
+    if parameters.model_type == ModelType.THERMALNERFACTO:
         tmp_folder = Path("./data_folder/")
         shutil.copytree(src=parameters.data, dst=tmp_folder)
         os.chmod(tmp_folder / "transforms.json", stat.S_IRWXU)
@@ -100,13 +101,17 @@ if __name__ == "__main__":
     parameters.model.max_num_iterations = parameters.max_num_iterations
     parameters.model.data = parameters.data
     parameters.model.viewer.quit_on_train_completion = True
-    assert isinstance(parameters.model.pipeline.model, ThermalNerfModelConfig)
+    assert isinstance(parameters.model.pipeline.model, ThermalNerfactoModelConfig)
     parameters.model.pipeline.model.max_temperature = parameters.temperature_bounds[0]
     parameters.model.pipeline.model.min_temperature = parameters.temperature_bounds[1]
     parameters.model.pipeline.model.cold = parameters.cold
-    parameters.model.pipeline.model.camera_optimizer_mode = parameters.camera_optimizer_mode  # noqa: E501
+    parameters.model.pipeline.model.camera_optimizer_mode = (
+        parameters.camera_optimizer_mode
+    )
     assert isinstance(parameters.model.pipeline.datamanager, VanillaDataManagerConfig)
-    assert isinstance(parameters.model.pipeline.datamanager.dataparser, NerfstudioDataParserConfig)  # noqa: E501
+    assert isinstance(
+        parameters.model.pipeline.datamanager.dataparser, NerfstudioDataParserConfig
+    )
     parameters.model.pipeline.datamanager.dataparser.eval_mode = parameters.eval_mode
 
     main(parameters.model)
