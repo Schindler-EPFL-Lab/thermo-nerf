@@ -1,4 +1,5 @@
 import json
+import tarfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -8,13 +9,23 @@ import tyro
 
 
 @dataclass(kw_only=True)
-class Parameters:
-    img_path: Path
-    """Path to the folder containing the images."""
+class EvaluatePrecisionScriptParameters:
+    img_path: Path = Path("data/camera_precision_experiment.tar.xz")
+    """
+    Path to the folder containing the images.
+    Either a folder of images or a tar.xz file (with suffix .txz) containing the images.
+    """
 
     def __post_init__(self):
         if not self.img_path.exists():
             raise FileNotFoundError(f"Could not find file: {self.img_path}")
+
+        if self.img_path.is_file() and self.img_path.suffix == ".txz":
+            data_folder = self.img_path.parent / self.img_path.stem
+            with tarfile.open(self.img_path, "r:xz") as tar_ref:
+                tar_ref.extractall(self.img_path.parent)
+            self.img_path = data_folder
+
         self.img_path = self.img_path / "thermal"
         json_file = self.img_path.parent / "temperature_bounds.json"
         with open(json_file, "r") as file:
@@ -63,7 +74,7 @@ def pixel_wise_mean(
     return pixel_wise_mean
 
 
-def calculate_pixel_wise_std(
+def calculate_pixel_wise_variance(
     image_path: Path, pixel_mean: np.ndarray, min_value: float, max_value: float
 ) -> np.ndarray:
     # Read the image
@@ -82,7 +93,7 @@ def pixel_wise_std(
     total_squared_diff = None
     image_count = 0
     for image in image_folder.iterdir():
-        std = calculate_pixel_wise_std(image, pixel_mean, min_value, max_value)
+        std = calculate_pixel_wise_variance(image, pixel_mean, min_value, max_value)
         # Calculate the standard deviation
         # Accumulate the mean and standard deviation
         if total_squared_diff is None:
@@ -102,7 +113,7 @@ if __name__ == "__main__":
     `img_path` contains the thermal images extracted using the script
     thermoscenes_preprocess_thermal
     """
-    parameters = tyro.cli(Parameters)
+    parameters = tyro.cli(EvaluatePrecisionScriptParameters)
 
     mean = pixel_wise_mean(
         parameters.img_path, parameters.min_value, parameters.max_value

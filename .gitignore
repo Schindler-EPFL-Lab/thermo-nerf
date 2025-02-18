@@ -1,5 +1,6 @@
 /.venv
-/data
+/data/*
+!/data/camera_precision_experiment
 /outputs
 **/__pycache__/**
 /env
