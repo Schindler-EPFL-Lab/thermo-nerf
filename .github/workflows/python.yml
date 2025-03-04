@@ -28,7 +28,7 @@ jobs:
         run: |
           git clone https://github.com/ITVRoC/FlirImageExtractor.git --depth 1
           sudo apt-get update
-          sudo apt install exiftool python-setuptools
+          sudo apt install exiftool python3-setuptools
       - name: Lint with ruff
         run: |
           ruff check
