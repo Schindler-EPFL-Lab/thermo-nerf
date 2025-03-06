@@ -86,7 +86,9 @@ class Renderer:
         # Get model state
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         checkpoint_path = list(model_path.rglob("*.ckpt"))[-1]
-        loaded_state = torch.load(checkpoint_path, map_location=device)
+        loaded_state = torch.load(
+            checkpoint_path, map_location=device, weights_only=False
+        )
 
         # overwrite no-longer-existing remote path generated with respect to the
         # training job's remote cluster with an absolute data-asset path.
