@@ -1,7 +1,3 @@
-import json
-import os
-import shutil
-import stat
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -18,6 +14,7 @@ from thermo_nerf.nerfacto_config.thermal_nerfacto import ThermalNerfactoModelCon
 from thermo_nerf.render.renderer import Renderer
 from thermo_nerf.rendered_image_modalities import RenderedImageModality
 from thermo_nerf.rgb_concat.config_concat_nerfacto import concat_nerf_config
+from thermo_nerf.thermal_as_rgb import thermal_as_rgb
 from thermo_nerf.thermal_nerf.calculate_threshold import calculate_threshold
 from thermo_nerf.thermal_nerf.config_thermal_nerf import thermal_nerf_config
 
@@ -86,14 +83,7 @@ if __name__ == "__main__":
 
     if parameters.model_type == ModelType.THERMALNERFACTO:
         tmp_folder = Path("./data_folder/")
-        shutil.copytree(src=parameters.data, dst=tmp_folder)
-        os.chmod(tmp_folder / "transforms.json", stat.S_IRWXU)
-        with open(tmp_folder / "transforms.json", "r") as f:
-            config = json.load(f)
-        for frame in config["frames"]:
-            frame["file_path"] = frame["thermal_file_path"]
-        with open(tmp_folder / "transforms.json", "w") as f:
-            json.dump(config, f, indent=4)
+        thermal_as_rgb(thermal_dataset=tmp_folder, rgb_dataset=parameters.data)
         parameters.data = tmp_folder
 
     parameters.model.experiment_name = parameters.experiment_name
