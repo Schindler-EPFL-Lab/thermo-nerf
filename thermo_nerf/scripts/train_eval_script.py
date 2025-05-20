@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
     main(parameters.model)
 
-    pipeline, config = Renderer.extract_pipeline(
+    pipeline, config, _ = Renderer.extract_pipeline(
         parameters.model.output_dir, parameters.data
     )
     evaluator = Evaluator(

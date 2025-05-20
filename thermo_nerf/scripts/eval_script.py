@@ -31,7 +31,7 @@ def main() -> None:
     tyro.extras.set_accent_color("bright_yellow")
     parameters = tyro.cli(EvalCLIArgs)
 
-    pipeline, config = Renderer.extract_pipeline(
+    pipeline, config, _ = Renderer.extract_pipeline(
         parameters.model_uri, parameters.dataset_path
     )
     evaluator = Evaluator(pipeline=pipeline, config=config)
