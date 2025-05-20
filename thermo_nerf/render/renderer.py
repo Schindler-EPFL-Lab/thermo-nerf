@@ -3,9 +3,11 @@ from pathlib import Path
 from typing import Optional
 
 import imageio
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import yaml
+from matplotlib.colors import Colormap
 from nerfstudio.cameras.camera_paths import get_path_from_json
 from nerfstudio.cameras.cameras import Cameras
 from nerfstudio.engine.trainer import TrainerConfig
@@ -68,9 +70,10 @@ class Renderer:
     def extract_pipeline(
         model_path: Path,
         transforms_path: Path,
-        eval_num_rays_per_chunk: Optional[int] = None,
+        eval_num_rays_per_chunk: int | None = None,
         test_mode: str = "inference",
-    ) -> tuple[Pipeline, TrainerConfig]:
+        output_dir: Path | None = Path("."),
+    ) -> tuple[Pipeline, TrainerConfig, int]:
         """
         Extract the pipeline from a model.
 
@@ -78,6 +81,9 @@ class Renderer:
         You can choose the `test_mode` in function of what you will do with the
         pipeline: if you need to run the model on data from the train dataset,
         use "test", otherwise "inference" is probably enough.
+        `output_dir` is overwriting the output_dir of the configuration loaded to avoid
+        inexistant paths. if set to None, the output_dir in the config file is not
+        changed.
 
         :return: the pipeline and associated trainer config
         """
@@ -90,10 +96,13 @@ class Renderer:
             checkpoint_path, map_location=device, weights_only=False
         )
 
-        # overwrite no-longer-existing remote path generated with respect to the
-        # training job's remote cluster with an absolute data-asset path.
+        # Add an absolute data-asset path.
         config.pipeline.datamanager.data = transforms_path
         config.pipeline.datamanager.dataparser.data = transforms_path
+        # Update output directory and make sure it exists
+        if output_dir is not None:
+            config.output_dir = output_dir
+            config.get_base_dir().mkdir(parents=True, exist_ok=True)
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -103,7 +112,7 @@ class Renderer:
         pipeline.eval()
         pipeline.load_pipeline(loaded_state["pipeline"], loaded_state["step"])
 
-        return pipeline, config
+        return pipeline, config, loaded_state["step"]
 
     @classmethod
     def from_pipeline_path(
@@ -124,7 +133,7 @@ class Renderer:
         :returns: pipeline containg trained model with similar configurations to
         training.
         """
-        pipeline, _ = Renderer.extract_pipeline(
+        pipeline, _, _ = Renderer.extract_pipeline(
             model_path=model_path,
             transforms_path=transforms_path,
             eval_num_rays_per_chunk=eval_num_rays_per_chunk,
@@ -149,7 +158,10 @@ class Renderer:
         return cameras
 
     def render(
-        self, rendered_image_modalities: list[RenderedImageModality], cameras: Cameras
+        self,
+        rendered_image_modalities: list[RenderedImageModality],
+        cameras: Cameras,
+        thermal_color_map: Colormap = plt.colormaps["magma"],
     ) -> None:
         """
         Helper function to create a video of trajectory of `cameras`.
@@ -180,7 +192,12 @@ class Renderer:
                     output_image = outputs[modality.value].cpu().numpy()
                     if output_image.shape[-1] == 1:
                         output_image = np.concatenate((output_image,) * 3, axis=-1)
-                    output_image = (output_image * 255).astype(np.uint8)
+                    if modality == RenderedImageModality.THERMAL:
+                        output_image = (
+                            thermal_color_map(output_image[:, :, 0])[:, :, :3] * 255
+                        ).astype(np.uint8)
+                    else:
+                        output_image = (output_image * 255).astype(np.uint8)
                     self._rendered_images[modality].append(output_image)
 
     def save_images(self, modalities: list[RenderedImageModality], output_dir: Path):

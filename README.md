@@ -62,6 +62,13 @@ To render a path of a scpefic scene using a pretrained model, use the following 
 ```bash
 python thermo_nerf/scripts/render_video_script.py --dataset_path DATA_PATH --model_uri MODEL_PATH --camera_path_filename CAMERA_PATH_JSON --output_dir RENDER_RESULTS_PATH
 ```
+## Visualization
+
+A more exhaustive evaluation of the model can be done using [Nerfstudio](https://github.com/nerfstudio-project/nerfstudio) viewer.
+To render a thermal model run the related script:
+```bash
+python thermo_nerf/scripts/thermal_viewer.py --model-path MODEL_PATH --dataset-path DATA_PATH
+```
 
 ## Contribute
 
