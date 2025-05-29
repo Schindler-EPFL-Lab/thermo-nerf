@@ -1,12 +1,17 @@
 # ThermoNeRF
 
-This repo is the official Pytorch code from [ThermoNerf](https://arxiv.org/abs/2403.12154).
+Build RGB+Thermal models easily!
+
+This repo is the official Pytorch code for [ThermoNerf](https://www.sciencedirect.com/science/article/abs/pii/S1474034625002381). PDF [here](https://arxiv.org/abs/2403.12154).
+
+![thermal EPFL pavillon](images/epfl_pavillon.gif)
+![thermal cup](images/cup.gif)
 
 ## Introduction
 
 ![Summary of the method](images/summary.png)
 
-we present ThermoNeRF, a novel multimodal approach based on Neural Radiance Fields, capable of rendering new RGB and thermal views of a scene jointly.
+We present ThermoNeRF, a novel multimodal approach based on Neural Radiance Fields, capable of rendering new RGB and thermal views of a scene jointly.
 To overcome the lack of texture in thermal images, we use paired RGB and thermal images to learn scene density, while distinct networks estimate color and temperature information.
 
 One of the unique contribution of ThermoNeRF is that both RGB and thermal data are used to backpropagate to the density, leading to a consistent representation of the scene for both RGB and thermal.
@@ -67,15 +72,14 @@ The code needs to be type annotated and following our documentation style.
 
 ## How to cite
 
-For now the paper is on arxiv:
-
 ```bibtex
-@misc{hassan2024thermonerf,
-      title={ThermoNeRF: Multimodal Neural Radiance Fields for Thermal Novel View Synthesis},
-      author={Mariam Hassan and Florent Forest and Olga Fink and Malcolm Mielle},
-      year={2024},
-      eprint={2403.12154},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@article{hassan2025thermonerf,
+  title={ThermoNeRF: A multimodal Neural Radiance Field for joint RGB-thermal novel view synthesis of building facades},
+  author={Hassan, Mariam and Forest, Florent and Fink, Olga and Mielle, Malcolm},
+  journal={Advanced Engineering Informatics},
+  volume={65},
+  pages={103345},
+  year={2025},
+  publisher={Elsevier}
 }
 ```
