@@ -1,21 +1,30 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
-version = "1.0.0"
 name = "thermo-nerf"
 description = 'thermo-nerf'
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["pytorch", "thermal", "nerf", "mlflow", "flir"]
 dependencies = ["nerfstudio >= 1.1.5", "mlflow >= 2.11.1", "ruff >= 0.7.4"]
+dynamic = ["version"]
 
 [project.optional-dependencies]
 flir = ["flirimageextractor >= 1.5.3"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["thermo_nerf", "thermo_scenes"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+version_scheme = "no-guess-dev"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "_version.py"
 
 # RUFF
 
