@@ -1,0 +1,3 @@
+[submodule "FlirImageExtractor"]
+	path = FlirImageExtractor
+	url = https://github.com/ITVRoC/FlirImageExtractor
