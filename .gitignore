@@ -4,3 +4,4 @@
 /outputs
 **/__pycache__/**
 /env
+_version.py

@@ -27,8 +27,16 @@ If you create a new scene and wish to share it with everyone, send it to us and 
 
 ## Installation
 
-ThermoNeRF was tested under Python 3.10 with torch `1.13.1`.
-Install the package by running `pip install -e .` and then thermoNeRF should be ready to go.
+ThermoNeRF was tested under Python 3.10 and with torch `1.13.1`.
+
+Clone the package.
+If you want to use FLIR cameras and build your dataset, clone with the submodule:
+
+```bash
+$ git clone --recurse-submodules git@github.com:Schindler-EPFL-Lab/thermo-nerf.git
+```
+
+Install the package by running `uv sync --all-extras --prerelease=allow` and then thermoNeRF should be ready to go.
 
 ## Train and Evaluate
 

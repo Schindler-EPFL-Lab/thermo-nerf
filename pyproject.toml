@@ -8,8 +8,11 @@ description = 'thermo-nerf'
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["pytorch", "thermal", "nerf", "mlflow", "flir"]
-dependencies = ["nerfstudio >= 1.1.5", "mlflow >= 2.11.1", "ruff >= 0.7.4"]
+dependencies = ["nerfstudio >= 1.1.5", "mlflow >= 2.11.1"]
 dynamic = ["version"]
+
+[dependency-groups]
+dev = ["ruff>=0.9.7"]
 
 [project.optional-dependencies]
 flir = ["flirimageextractor >= 1.5.3"]
@@ -69,7 +72,6 @@ docstring-code-format = true
 docstring-code-line-length = "dynamic"
 
 # CLI
-
 [project.scripts]
 thermoscenes_images_to_nerf_dataset = "thermo_scenes.scripts.images_to_nerf_dataset:main"
 thermoscenes_rename_files = "thermo_scenes.scripts.rename_files:main"
