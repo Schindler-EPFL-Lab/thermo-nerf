@@ -1,0 +1,26 @@
+name: Publish to Pypi
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  test:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install the project deps
+        run: |
+          git submodule update --init --recursive
+          sudo apt-get update
+          sudo apt install exiftool python3-setuptools
+      - name: Install uv
+        run: pip install uv
+      - name: Build
+        run: uv build
+      - name: Publish
+        run: uv publish --token ${{ secrets.PYPI_TOKEN }}
+
