@@ -18,7 +18,7 @@ dev = ["ruff>=0.9.7"]
 flir = ["flirimageextractor >= 1.5.3"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["thermo_nerf", "thermo_scenes"]
+packages = ["thermo_nerf", "thermo_scenes", "FlirImageExtractor"]
 
 [tool.hatch.version]
 source = "vcs"
