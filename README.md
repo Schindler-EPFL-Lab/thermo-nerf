@@ -27,6 +27,20 @@ If you create a new scene and wish to share it with everyone, send it to us and 
 
 ## Installation
 
+ThermoNeRF can now be installed using [pypi](https://pypi.org/project/thermo-nerf/)!
+
+```bash
+> pip install thermo-nerf
+```
+
+or
+
+```bash
+> uv add thermo-nerf
+```
+
+### Manual install for development
+
 ThermoNeRF was tested under Python 3.10 and with torch `1.13.1`.
 
 Clone the package.
