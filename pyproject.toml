@@ -71,9 +71,17 @@ docstring-code-format = true
 # enabled.
 docstring-code-line-length = "dynamic"
 
+[tool.basedpyright]
+typeCheckingMode = "recommended"
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownMemberType = false
+reportAny = false
+
 # CLI
 [project.scripts]
 thermoscenes_images_to_nerf_dataset = "thermo_scenes.scripts.images_to_nerf_dataset:main"
 thermoscenes_rename_files = "thermo_scenes.scripts.rename_files:main"
 thermoscenes_rescale_thermal_images = "thermo_scenes.scripts.rescale_thermal_images:main"
 thermoscenes_preprocess_thermal = "thermo_scenes.scripts.preprocess_thermal:main"
+colorize_thermal_images = "thermo_scenes.scripts.colorize_thermal_images:main"

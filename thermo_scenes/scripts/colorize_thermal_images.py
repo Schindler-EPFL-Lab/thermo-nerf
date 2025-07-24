@@ -3,15 +3,16 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 import tyro
 from PIL import Image
 
 
 def save_image_with_colormap(
-    image: np.ndarray,
+    image: npt.NDArray[np.float64],
     output_img: Path,
-    min_temp,
-    max_temp,
+    min_temp: float,
+    max_temp: float,
     display_cmap: bool = False,
     show: bool = False,
 ) -> None:
@@ -29,14 +30,14 @@ def save_image_with_colormap(
     colored_image = cmap(image)
 
     # Add colorbar
-    plt.imshow(
+    _ = plt.imshow(
         colored_image,
         cmap=cmap,
         vmin=min_temp,
         vmax=max_temp,
     )
 
-    plt.axis("off")
+    _ = plt.axis("off")
     if display_cmap:
         cbar = plt.colorbar(orientation="vertical", fraction=0.05, cmap=cmap)
         cbar.set_label("Temperature", rotation=270, labelpad=15)
@@ -52,10 +53,39 @@ def save_image_with_colormap(
         plt.show()
 
 
-def main(images: Path, output_dir: Path, temperatures_bound: Path) -> None:
+def colorize_image(
+    image_path: Path, reconstruction_img_path: Path, temperatures_bound: Path
+) -> None:
+    if not (
+        image_path.suffix == ".jpg"
+        or image_path.suffix == ".png"
+        or image_path.suffix == ".PNG"
+        or image_path.suffix == ".jpeg"
+    ):
+        return
+
+    with open(temperatures_bound, "r") as json_file:
+        temperature_bounds = json.load(json_file)
+    max_temp = temperature_bounds["absolute_max_temperature"]
+    min_temp = temperature_bounds["absolute_min_temperature"]
+
+    greyscale_img = np.array(Image.open(image_path).convert("L"))
+    greyscale_img = greyscale_img / 255.0
+    greyscale_img = greyscale_img * (max_temp - min_temp) + min_temp
+    save_image_with_colormap(
+        image=greyscale_img,
+        output_img=reconstruction_img_path,
+        min_temp=min_temp,
+        max_temp=max_temp,
+        display_cmap=False,
+    )
+
+
+def colorize(images: Path, output_dir: Path, temperatures_bound: Path) -> None:
     """
-    Colorize the thermal images in `images` using the temperature bounds in
-    `temperatures_bound` and save the colorized images in `output_dir`.
+    Colorize the thermal images in `images` (which can be a single file or a folder)
+    using the temperature bounds in `temperatures_bound` and save the colorized images
+    in `output_dir`.
     """
 
     if temperatures_bound.suffix != ".json":
@@ -66,33 +96,24 @@ def main(images: Path, output_dir: Path, temperatures_bound: Path) -> None:
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    if not images.is_dir():
+        # Assume it is a file
+        reconstruction_img_path = Path(output_dir, images.name)
+        if reconstruction_img_path == images:
+            reconstruction_img_path = Path(
+                output_dir, f"{images.stem}_colorized{images.suffix}"
+            )
+        colorize_image(images, reconstruction_img_path, temperatures_bound)
+        return
+
     for image_path in images.iterdir():
-
-        if not (
-            image_path.suffix == ".jpg"
-            or image_path.suffix == ".png"
-            or image_path.suffix == ".PNG"
-            or image_path.suffix == ".jpeg"
-        ):
-            continue
         reconstruction_img_path = Path(output_dir, image_path.name)
+        colorize_image(image_path, reconstruction_img_path, temperatures_bound)
 
-        with open(temperatures_bound, "r") as json_file:
-            temperature_bounds = json.load(json_file)
-        max_temp = temperature_bounds["absolute_max_temperature"]
-        min_temp = temperature_bounds["absolute_min_temperature"]
 
-        greyscale_img = np.array(Image.open(image_path).convert("L"))
-        greyscale_img = greyscale_img / 255.0
-        greyscale_img = greyscale_img * (max_temp - min_temp) + min_temp
-        save_image_with_colormap(
-            image=greyscale_img,
-            output_img=reconstruction_img_path,
-            min_temp=min_temp,
-            max_temp=max_temp,
-            display_cmap=False,
-        )
+def main() -> None:
+    tyro.cli(colorize)
 
 
 if __name__ == "__main__":
-    tyro.cli(main)
+    main()
