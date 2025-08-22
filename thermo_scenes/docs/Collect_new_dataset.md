@@ -18,11 +18,14 @@ And align the RGB boundaries with the thermal image using the slider:
 
 You must use FLIR cloud service to transfer the images to your computer:
 
-- First, select all the images and download them, this will save the MSX images in a zip file.
+- First, select all images and download them, this will save the MSX images (in. JPG format) in a zip file.
+  ![All MSX images downloading](images/flir_download_thermal.png)
 - Then, download one by one the RGB DC images by opening them in the gallery.
   This step is necessary to align the RGB and thermal image; using the MSX image to extract both will result in non-aligned RGB/thermal images.
+  ![RGB images downloading](images/flir_download_rgb.png)
 
-Save all your MSX images to one folder named "MSX" and your RGB into another one.
+Save all your MSX images to one folder named "MSX" and your RGB into another one named "RGB".
+Note that "RGB" folder will be used later in [Split data into train and eval](#split-data-into-train-and-eval)
 
 ## Data extraction
 
@@ -55,8 +58,6 @@ thermoscenes_preprocess_thermal --msx-images <path_to_msx> --output-folder <path
 
 > If your MSX images are in more than one folder, do it for all folders, and make sure that the temperature are rescaled to the same range in the next step.
 
-To ensure alignment of the RGB and thermal images, one must replace the extracted RGB images with the ones downloaded from the Flir cloud.
-
 ### Rescale the temperatures
 
 It should be noted that in the FLIR app, there is an option to manually lock the temperature range when taking the photos.
@@ -74,9 +75,9 @@ thermoscenes_rescale_thermal_images.py --input-folder <input_folder> --output-fo
 Create the following folders:
 
 - "thermal_train": put your thermal images used for training here
-- "rgb_train": put the corresponding rgb image of all thermal images in "thermal_train"
+- "rgb_train": put the rgb images **from the "RGB" folder** which correspond to thermal images in "thermal_train"
 - "thermal_eval": put your thermal images used for eval here
-- "rgb_eval": put the corresponding rgb image of all thermal images in "thermal_eval"
+- "rgb_eval": put the rgb images **from the "RGB" folder** which correspond to thermal images in "thermal_eval"
 
 Then, all files must be renamed using:
 
