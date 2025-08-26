@@ -73,10 +73,13 @@ class CustomFlir(FlirImageExtractor):
         self.absolute_max_temperature = None
         self.absolute_min_temperature = None
 
+        self._thermal_shapes: dict[str, tuple[int, int]] = {}
+
         for img_path in path_to_msx_images.iterdir():
             self.process_image(Path(path_to_msx_images, img_path.name))
             self.export_thermal_to_csv(Path(output_csv_folder, img_path.stem + ".csv"))
             self.save_rgb_images(output_rgb_folder)
+            self._thermal_shapes[img_path.stem] = self.get_thermal_np().shape
 
         self.save_normalised_thermal_images(
             str(output_thermal_folder), str(output_csv_folder)
@@ -115,7 +118,8 @@ class CustomFlir(FlirImageExtractor):
                 self.absolute_max_temperature,
             )
 
-            gray_scale_image = temperature.reshape(640, 480).astype("uint8")
+            thermal_shape = self._thermal_shapes[path.stem]
+            gray_scale_image = temperature.reshape(*thermal_shape).astype("uint8")
 
             Image.fromarray(gray_scale_image, mode="L").save(
                 Path(path_to_thermal_images_curated, Path(path).stem + ".png")
