@@ -1,5 +1,12 @@
 # ThermoNeRF
 
+> [!TIP]
+> Want to find **better poses** for your multimodal dataset than when using colmap?
+> 
+> Working with **unpaired** RGB and thermal images?
+> 
+> Check out our new work [SEAR](https://github.com/Schindler-EPFL-Lab/SEAR) for **unpaired RGB+Thermal pose estimation using Feed Forward Transformers**!
+
 Build RGB+Thermal models easily!
 
 This repo is the official Pytorch code for [ThermoNerf](https://www.sciencedirect.com/science/article/abs/pii/S1474034625002381). PDF [here](https://arxiv.org/abs/2403.12154).
